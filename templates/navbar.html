@@ -7,7 +7,7 @@
       <div class="flex items-start">
         <a href="{{ url_for('index') }}">
           <img
-            src="{{ url_for('static', filename='img/logo2.png') }}"
+            src="https://res.cloudinary.com/diyv3z5pj/image/upload/v1751118021/Logo2_dh4iwg.png"
             alt="Logo"
             class="lg:h-[180px] md:h-[150px] h-[120px] object-cover rounded-xl mt-2 mr-12 md:mr-0 lg:mr-0 lg:mb-2"
           />
@@ -57,12 +57,19 @@
         >
       </div>
 
-      <!-- Mobile Hamburger Menu Button -->
-      <div class="md:hidden mr-4">
+      <!-- Mobile Search + Menu Buttons -->
+      <div class="md:hidden flex items-center space-x-4 mr-4">
+        <!-- Search Icon -->
+        <button
+          id="mobile-search-button"
+          class="text-gray-700 hover:text-blue-600 focus:outline-none"
+        >
+          <span class="material-symbols-outlined text-3xl">search</span>
+        </button>
+        <!-- Menu Icon -->
         <button
           id="mobile-menu-button"
-          class="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 transition duration-200"
-          aria-label="Toggle mobile menu"
+          class="text-gray-700 hover:text-blue-600 focus:outline-none"
         >
           <span class="material-symbols-outlined text-3xl" id="hamburger-icon"
             >menu</span
@@ -73,10 +80,10 @@
   </div>
 </nav>
 
-<!-- Mobile Search Bar (Hidden by default) -->
+<!-- Mobile Search Bar -->
 <div
   id="mobile-search"
-  class="md:hidden bg-white shadow-lg border-t border-gray-200 px-4 py-3 hidden"
+  class="md:hidden bg-white shadow-lg border-t border-gray-200 px-4 py-3 hidden absolute w-full z-40"
 >
   <form method="GET" action="{{ url_for('search') }}" class="relative w-full">
     <input
@@ -87,64 +94,89 @@
     />
     <button
       type="submit"
-      class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 hover:cursor-pointer transition duration-200 h-6 w-6 flex items-center justify-center"
+      class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 hover:cursor-pointer transition duration-200 h-6 w-6 flex items-center justify-center"
     >
       <span class="material-symbols-outlined text-xl leading-none">search</span>
+    </button>
+    <button
+      type="button"
+      id="close-mobile-search"
+      class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 hover:cursor-pointer transition duration-200 h-6 w-6 flex items-center justify-center"
+    >
+      <span class="material-symbols-outlined text-xl leading-none">close</span>
     </button>
   </form>
 </div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Buttons
     const mobileMenuButton = document.getElementById("mobile-menu-button");
+    const mobileSearchButton = document.getElementById("mobile-search-button");
+    const closeMobileSearch = document.getElementById("close-mobile-search");
+
+    // Icons and elements
     const hamburgerIcon = document.getElementById("hamburger-icon");
     const mobileSearch = document.getElementById("mobile-search");
     const sidebar = document.getElementById("mobile-sidebar");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
 
+    // States
     let isMenuOpen = false;
+    let isSearchOpen = false;
 
+    // Toggle Menu
     mobileMenuButton.addEventListener("click", function () {
       isMenuOpen = !isMenuOpen;
-
       if (isMenuOpen) {
-        // Open menu
         hamburgerIcon.textContent = "close";
-        mobileSearch.classList.remove("hidden");
         sidebar.classList.add("translate-x-0");
         sidebar.classList.remove("translate-x-full");
         sidebarOverlay.classList.remove("hidden");
         document.body.classList.add("overflow-hidden");
       } else {
-        // Close menu
         hamburgerIcon.textContent = "menu";
-        mobileSearch.classList.add("hidden");
         sidebar.classList.remove("translate-x-0");
         sidebar.classList.add("translate-x-full");
         sidebarOverlay.classList.add("hidden");
         document.body.classList.remove("overflow-hidden");
       }
+      // Close search if menu opens
+      if (isMenuOpen && isSearchOpen) {
+        mobileSearch.classList.add("hidden");
+        isSearchOpen = false;
+      }
+    });
+
+    // Toggle Search
+    mobileSearchButton.addEventListener("click", function () {
+      mobileSearch.classList.remove("hidden");
+      isSearchOpen = true;
+      // Close menu if search opens
+      if (isMenuOpen) {
+        hamburgerIcon.textContent = "menu";
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+        isMenuOpen = false;
+      }
+    });
+
+    // Close Search
+    closeMobileSearch.addEventListener("click", function () {
+      mobileSearch.classList.add("hidden");
+      isSearchOpen = false;
     });
 
     // Close sidebar when clicking overlay
-    if (sidebarOverlay) {
-      sidebarOverlay.addEventListener("click", function () {
-        if (isMenuOpen) {
-          mobileMenuButton.click();
-        }
-      });
-    }
-
-    // Close sidebar when clicking a link
-    const sidebarLinks = sidebar?.querySelectorAll("a");
-    if (sidebarLinks) {
-      sidebarLinks.forEach((link) => {
-        link.addEventListener("click", function () {
-          if (isMenuOpen) {
-            mobileMenuButton.click();
-          }
-        });
-      });
-    }
+    sidebarOverlay?.addEventListener("click", function () {
+      hamburgerIcon.textContent = "menu";
+      sidebar.classList.remove("translate-x-0");
+      sidebar.classList.add("translate-x-full");
+      sidebarOverlay.classList.add("hidden");
+      document.body.classList.remove("overflow-hidden");
+      isMenuOpen = false;
+    });
   });
 </script>
