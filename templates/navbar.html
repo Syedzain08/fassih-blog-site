@@ -1,0 +1,150 @@
+{% include 'sidebar.html' %}
+
+<nav class="top-0 left-0 w-full bg-white shadow-xl z-50 rounded-xl">
+  <div class="w-full">
+    <div class="flex justify-between items-center h-18">
+      <!-- Logo -->
+      <div class="flex items-start">
+        <a href="{{ url_for('index') }}">
+          <img
+            src="{{ url_for('static', filename='img/logo2.png') }}"
+            alt="Logo"
+            class="lg:h-[180px] md:h-[150px] h-[120px] object-cover rounded-xl mt-2 mr-12 md:mr-0 lg:mr-0 lg:mb-2"
+          />
+        </a>
+      </div>
+
+      <!-- Desktop Search Bar -->
+      <div class="hidden md:flex items-center flex-1 justify-center px-6">
+        <form
+          method="GET"
+          action="{{ url_for('search') }}"
+          class="relative w-full max-w-md"
+        >
+          <input
+            type="text"
+            name="q"
+            placeholder="Search blog..."
+            class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button
+            type="submit"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 hover:cursor-pointer transition duration-200 h-6 w-6 flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-xl leading-none"
+              >search</span
+            >
+          </button>
+        </form>
+      </div>
+
+      <!-- Desktop Navigation Links -->
+      <div class="hidden md:flex space-x-10 text-base font-medium mr-[67px]">
+        <a
+          href="{{ url_for('index') }}#about"
+          class="text-gray-700 hover:text-blue-600 transition"
+          >About</a
+        >
+        <a
+          href="{{ url_for('index') }}#recent-blog"
+          class="text-gray-700 hover:text-blue-600 transition"
+          >Blog</a
+        >
+        <a
+          href="{{ url_for('index') }}#contact"
+          class="text-gray-700 hover:text-blue-600 transition"
+          >Contact</a
+        >
+      </div>
+
+      <!-- Mobile Hamburger Menu Button -->
+      <div class="md:hidden mr-4">
+        <button
+          id="mobile-menu-button"
+          class="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 transition duration-200"
+          aria-label="Toggle mobile menu"
+        >
+          <span class="material-symbols-outlined text-3xl" id="hamburger-icon"
+            >menu</span
+          >
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Search Bar (Hidden by default) -->
+<div
+  id="mobile-search"
+  class="md:hidden bg-white shadow-lg border-t border-gray-200 px-4 py-3 hidden"
+>
+  <form method="GET" action="{{ url_for('search') }}" class="relative w-full">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search blog..."
+      class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    />
+    <button
+      type="submit"
+      class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 hover:cursor-pointer transition duration-200 h-6 w-6 flex items-center justify-center"
+    >
+      <span class="material-symbols-outlined text-xl leading-none">search</span>
+    </button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const mobileMenuButton = document.getElementById("mobile-menu-button");
+    const hamburgerIcon = document.getElementById("hamburger-icon");
+    const mobileSearch = document.getElementById("mobile-search");
+    const sidebar = document.getElementById("mobile-sidebar");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+    let isMenuOpen = false;
+
+    mobileMenuButton.addEventListener("click", function () {
+      isMenuOpen = !isMenuOpen;
+
+      if (isMenuOpen) {
+        // Open menu
+        hamburgerIcon.textContent = "close";
+        mobileSearch.classList.remove("hidden");
+        sidebar.classList.add("translate-x-0");
+        sidebar.classList.remove("translate-x-full");
+        sidebarOverlay.classList.remove("hidden");
+        document.body.classList.add("overflow-hidden");
+      } else {
+        // Close menu
+        hamburgerIcon.textContent = "menu";
+        mobileSearch.classList.add("hidden");
+        sidebar.classList.remove("translate-x-0");
+        sidebar.classList.add("translate-x-full");
+        sidebarOverlay.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+      }
+    });
+
+    // Close sidebar when clicking overlay
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener("click", function () {
+        if (isMenuOpen) {
+          mobileMenuButton.click();
+        }
+      });
+    }
+
+    // Close sidebar when clicking a link
+    const sidebarLinks = sidebar?.querySelectorAll("a");
+    if (sidebarLinks) {
+      sidebarLinks.forEach((link) => {
+        link.addEventListener("click", function () {
+          if (isMenuOpen) {
+            mobileMenuButton.click();
+          }
+        });
+      });
+    }
+  });
+</script>

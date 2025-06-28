@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <script src="{{ url_for('static', filename='js/alert-dismissal.js') }}"></script>
+    <title>Forgot Username</title>
+  </head>
+  <body class="bg-[#0f0f0f] text-white">
+    {% include 'alert.html' %}
+    <div
+      class="flex p-8 items-center md:w-[560px] md:h-[420px] min-w-[320px] h-[410px] absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 flex-col bg-[#1a1a1a] rounded-xl shadow-md border border-[#2e2e2e] backdrop-blur-sm bg-opacity-90 justify-center"
+    >
+      <h1 class="text-2xl font-bold mb-2 text-white">Forgot Username</h1>
+      <h2 class="text-lg text-gray-300 mb-6">
+        Enter your email to receive your username
+      </h2>
+      <form
+        method="POST"
+        action="{{ url_for('forgot_username') }}"
+        class="w-full"
+      >
+        {{ form.hidden_tag() }}
+        <div class="mb-6">
+          <label for="email" class="block text-gray-300 mb-1"
+            >Email Address</label
+          >
+          {{ form.email(class_="w-full px-4 py-2 border border-gray-600
+          bg-[#111111] text-white rounded-lg focus:outline-none focus:ring-2
+          focus:ring-blue-600", placeholder="Enter your email address") }} {%
+          for error in form.email.errors %}
+          <span class="text-red-500 text-sm">{{ error }}</span>
+          {% endfor %}
+        </div>
+        <div class="mb-4">
+          {{ form.submit.label(class_="block text-gray-300 mb-1") }} {{
+          form.submit(class_="w-full bg-blue-600 hover:bg-blue-700 text-white
+          font-semibold py-2 px-4 rounded-lg transition hover:cursor-pointer")
+          }}
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-blue-400 underline">
+            <a href="{{ url_for('login') }}" class="hover:text-blue-300"
+              >Back to Login</a
+            >
+          </p>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

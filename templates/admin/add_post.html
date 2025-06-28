@@ -1,0 +1,284 @@
+{% extends "admin/base.html" %} {% block title %}{% if edit_mode %}Edit{% else
+%}Create{% endif %} Post{% endblock %} {% block head %}
+<script
+  src="https://cdn.tiny.cloud/1/ult3ksjejkbf2yzhxkktmab1xmlnkylkaq0ws88hrbf4i76i/tinymce/7/tinymce.min.js"
+  referrerpolicy="origin"
+></script>
+{% endblock %} {% block body %}
+<div class="container mx-auto px-4 py-12">
+  <div class="max-w-4xl mx-auto bg-gray-900 rounded-xl shadow-lg p-8">
+    <form id="blog-post-form" method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+      <!-- Title -->
+      <div class="mb-6">
+        {{ form.title.label(class_="block text-white font-semibold text-2xl
+        mb-3") }} {{ form.title( class_="w-full bg-gray-800 border
+        border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+        focus:ring-2 focus:ring-blue-600 transition-all" ) }}
+      </div>
+
+      <!-- Description -->
+      <div class="mb-6">
+        {{ form.description.label(class_="block text-white font-semibold
+        text-2xl mb-3") }} {{ form.description( class_="w-full bg-gray-800
+        border border-gray-700 text-white rounded-lg px-4 py-2
+        focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all",
+        maxlength="150", value=article.description if article and
+        article.description ) }}
+        <p class="text-gray-400 text-sm mt-1">
+          <span id="desc-counter"
+            >{{ article.description|length if article and article.description
+            else 0 }}</span
+          >/150 characters
+        </p>
+      </div>
+
+      <!-- Thumbnail Upload -->
+      <div class="mb-6">
+        <label
+          class="block text-white font-semibold text-2xl mb-3"
+          for="thumbnail"
+        >
+          Thumbnail (Optional)
+        </label>
+        <input
+          class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+          type="file"
+          id="thumbnail"
+          name="thumbnail"
+          accept="image/*"
+        />
+        {% if edit_mode and article.thumbnail %}
+        <div class="mt-4">
+          <p class="text-gray-400 mb-2">Current Thumbnail:</p>
+          <img
+            src="{{ article.thumbnail }}"
+            class="h-32 rounded-lg object-cover"
+          />
+        </div>
+        {% endif %}
+        <p id="thumbnailStatus" class="text-gray-400 mt-2 text-sm"></p>
+      </div>
+
+      <!-- Content Editor -->
+      <div class="mb-6">
+        {{ form.content.label(class_="block text-white font-semibold text-2xl
+        mb-3") }} {{ form.content( id="content", class_="w-full bg-gray-800
+        border border-gray-700 text-white rounded-lg px-4 py-2 h-64
+        focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all" ) }}
+      </div>
+
+      <!-- Tags -->
+      <div class="mb-6">
+        {{ form.tags.label(class_="block text-white font-semibold text-2xl
+        mb-3") }} {{ form.tags( class_="w-full bg-gray-800 border
+        border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+        focus:ring-2 focus:ring-blue-600 transition-all" ) }}
+      </div>
+
+      <!-- Status (Only for editing) -->
+      {% if edit_mode %}
+      <div class="mb-6">
+        {{ form.status.label(class_="block text-white font-semibold text-2xl
+        mb-3") }} {{ form.status( class_="w-full bg-gray-800 border
+        border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+        focus:ring-2 focus:ring-blue-600 transition-all" ) }}
+      </div>
+      {% endif %}
+
+      <!-- Submit -->
+      <div class="text-right">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full transition-all font-semibold hover:cursor-pointer"
+        >
+          {% if edit_mode %}Update Post{% else %}Create Post{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  tinymce.init({
+    selector: "textarea",
+    onboarding: false,
+    plugins: [
+      "anchor",
+      "autolink",
+      "charmap",
+      "codesample",
+      "emoticons",
+      "image",
+      "link",
+      "lists",
+      "media",
+      "searchreplace",
+      "table",
+      "visualblocks",
+      "wordcount",
+      "fullscreen",
+    ],
+    toolbar:
+      "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table  |  spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap |  fullscreen",
+
+    automatic_uploads: true,
+    // For image uploads
+    oolbar: "image",
+    images_upload_handler: (blobInfo, progress) => {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", blobInfo.blob(), blobInfo.filename());
+        const csrfToken = document
+          .querySelector('meta[name="csrf-token"]')
+          .getAttribute("content");
+
+        fetch("/upload_image", {
+          method: "POST",
+          headers: { "X-CSRFToken": csrfToken },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((json) => {
+            if (json.success && json.link) {
+              resolve(json.link);
+            } else {
+              reject(json.error || "Upload failed");
+            }
+          })
+          .catch((err) => {
+            reject("Upload failed: " + err.message);
+          });
+      });
+    },
+
+    file_picker_types: "media",
+    file_picker_callback: function (callback, value, meta) {
+      if (meta.filetype === "media") {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "video/*");
+
+        input.onchange = function () {
+          const file = input.files[0];
+          const formData = new FormData();
+          formData.append("video", file);
+
+          // CSRF token (if needed)
+          const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]'
+          ).content;
+
+          fetch("/upload_video", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": csrfToken,
+            },
+            body: formData,
+          })
+            .then((res) => res.json())
+            .then((json) => {
+              if (json.success && json.link) {
+                // Insert <video> tag
+                callback(json.link, { source2: "", poster: "" });
+              } else {
+                alert(json.error || "Upload failed");
+              }
+            })
+            .catch((err) => alert("Upload error: " + err.message));
+        };
+
+        input.click();
+      }
+    },
+  });
+  // Thumbnail Upload Handling
+  document.getElementById("thumbnail").addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute("content");
+
+    // Show uploading status
+    const statusEl = document.getElementById("thumbnailStatus");
+    statusEl.textContent = "Uploading...";
+
+    fetch("/upload_image", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrfToken },
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.link) {
+          statusEl.textContent = "Uploaded successfully!";
+
+          let hiddenInput = document.getElementById("thumbnailLink");
+          if (!hiddenInput) {
+            hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "thumbnail_link";
+            hiddenInput.id = "thumbnailLink";
+            document.getElementById("blog-post-form").appendChild(hiddenInput);
+          }
+          hiddenInput.value = json.link;
+        } else {
+          statusEl.textContent = json.error || "Upload failed.";
+        }
+      })
+      .catch((err) => {
+        statusEl.textContent = "Upload failed: " + err.message;
+      });
+  });
+
+  //  character counter
+  document.addEventListener("DOMContentLoaded", function () {
+    const descField = document.getElementById("{{ form.description.id }}");
+    const counter = document.getElementById("desc-counter");
+
+    if (descField && counter) {
+      // Initialize counter with current value length
+      const initialLength = descField.value ? descField.value.length : 0;
+      counter.textContent = initialLength;
+
+      // Update counter on input
+      descField.addEventListener("input", function () {
+        counter.textContent = this.value.length;
+
+        // Visual feedback when approaching limit
+        if (this.value.length >= 120) {
+          // Yellow at 80% of limit
+          counter.classList.add("text-yellow-500");
+          counter.classList.remove("text-gray-400");
+        } else {
+          counter.classList.remove("text-yellow-500");
+          counter.classList.add("text-gray-400");
+        }
+
+        if (this.value.length >= 150) {
+          // Red at limit
+          counter.classList.add("text-red-500");
+        } else {
+          counter.classList.remove("text-red-500");
+        }
+      });
+
+      // Initialize color based on current length
+      if (initialLength >= 120) {
+        counter.classList.add("text-yellow-500");
+        counter.classList.remove("text-gray-400");
+      }
+      if (initialLength >= 150) {
+        counter.classList.add("text-red-500");
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Panel -  Welcome{% endblock %}
+
+{% block body %}
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-400 text-sm">Total Posts</p>
+                <p class="text-2xl font-bold text-white">
+                  {{ total_articles }}
+                </p>
+              </div>
+              <div class="bg-blue-600 p-3 rounded-full">
+                <i class="fas fa-edit text-white"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-400 text-sm">Total Views</p>
+                <p class="text-2xl font-bold text-white">{{ total_views }}</p>
+              </div>
+              <div class="bg-green-600 p-3 rounded-full">
+                <i class="fas fa-eye text-white"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+              <a href="{{ url_for('add_post') }}"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg transition-colors duration-200 flex items-center space-x-3 hover:cursor-pointer"
+              >
+                <i class="fas fa-plus"></i>
+                <span>Create New Post</span>
+          </a>
+            
+            <a
+            href="{{ url_for('manage_admins') }}#add-admin"
+              class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-lg transition-colors duration-200 flex items-center space-x-3 hover:cursor-pointer"
+            >
+              <i class="fas fa-user-plus"></i>
+              <span>Add New Admin</span>
+        </a>
+            <a
+            href="{{ url_for('logout') }}"
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-lg transition-colors duration-200 flex items-center space-x-3 hover:cursor-pointer"
+            >
+              <i class="fas fa-right-from-bracket"></i>
+              <span>Logout</span>
+      </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+{% endblock %}
+  </body>
+</html>

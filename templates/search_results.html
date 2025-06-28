@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-white">
+  <head>
+    <link
+      href="{{ url_for('static', filename='css/main.css') }}"
+      rel="stylesheet"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% if query %}Search: {{ query }}{% else %}Search{% endif %} - Dr. Fassih
+      Ul Abbas
+    </title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <script src="../static/js/alert-dismissal.js"></script>
+  </head>
+
+  <body class="bg-gray-50">
+    {% include 'alert.html' %}
+
+    <!-- Search Header Section -->
+    <section class="bg-white border-b border-gray-200 py-12">
+      <div class="max-w-6xl mx-auto px-8">
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            {% if query %} Search Results for "{{ query }}" {% else %} Search
+            Articles {% endif %}
+          </h1>
+
+          <!-- Search Form -->
+          <form
+            method="GET"
+            action="{{ url_for('search') }}"
+            class="max-w-xl mx-auto"
+          >
+            <div class="relative">
+              <input
+                type="text"
+                name="q"
+                value="{{ query or '' }}"
+                placeholder="Search articles, topics, or tags..."
+                class="w-full px-6 py-4 text-lg border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-14"
+                autofocus
+              />
+              <span
+                class="material-symbols-outlined absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400"
+              >
+                search
+              </span>
+              <button
+                type="submit"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {% if query %}
+          <p class="text-gray-600 mt-4">
+            {% if total_results %} Found {{ total_results }} result{% if
+            total_results != 1 %}s{% endif %} {% else %} No results found {%
+            endif %}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Search Results Section -->
+    <section class="py-16 px-8">
+      <div class="max-w-6xl mx-auto">
+        {% if query and articles %}
+        <!-- Results Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {% for article in articles %}
+          <a
+            href="{{ url_for('view_post', slug=article.slug) }}"
+            class="block bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-gray-100"
+          >
+            <img
+              src="{% if article.thumbnail %}{{ article.thumbnail }}{% else %}https://picsum.photos/400/250?random={{ article.id }}{% endif %}"
+              alt="{{ article.title }}"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-3 line-clamp-2">
+                {{ article.title }}
+              </h3>
+              {% if article.description %}
+              <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                {{ article.description }}
+              </p>
+              {% endif %}
+
+              <div
+                class="flex justify-between items-center text-sm text-gray-500 mb-4"
+              >
+                <span>{{ article.created_at.strftime('%B %d, %Y') }}</span>
+                {% if article.view_count %}
+                <div class="flex items-center">
+                  <span class="material-symbols-outlined mr-2 text-blue-600"
+                    >visibility</span
+                  >
+                  <span>{{ article.view_count }}</span>
+                </div>
+                {% endif %}
+              </div>
+
+              <span class="text-blue-600 font-medium hover:underline">
+                Read more →
+              </span>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination and pagination.pages > 1 %}
+        <div class="flex justify-center mt-12">
+          <nav class="flex items-center space-x-2">
+            {% if pagination.has_prev %}
+            <a
+              href="{{ url_for('search', q=query, page=pagination.prev_num) }}"
+              class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              ← Previous
+            </a>
+            {% endif %} {% for page_num in pagination.iter_pages() %} {% if
+            page_num %} {% if page_num != pagination.page %}
+            <a
+              href="{{ url_for('search', q=query, page=page_num) }}"
+              class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              {{ page_num }}
+            </a>
+            {% else %}
+            <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+              {{ page_num }}
+            </span>
+            {% endif %} {% else %}
+            <span class="px-2 py-2 text-gray-400">…</span>
+            {% endif %} {% endfor %} {% if pagination.has_next %}
+            <a
+              href="{{ url_for('search', q=query, page=pagination.next_num) }}"
+              class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Next →
+            </a>
+            {% endif %}
+          </nav>
+        </div>
+        {% endif %} {% elif query and not articles %}
+        <!-- No Results Found -->
+        <div class="text-center py-16">
+          <div class="mb-8">
+            <svg
+              class="w-24 h-24 text-gray-300 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+              No Results Found
+            </h3>
+            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+              We couldn't find any articles matching "{{ query }}". Try
+              different keywords or browse our recent posts below.
+            </p>
+          </div>
+
+          <div class="space-y-2 text-sm text-gray-500">
+            <p><strong>Search Tips:</strong></p>
+            <p>• Try different or more general keywords</p>
+            <p>• Check your spelling</p>
+            <p>• Use fewer keywords</p>
+          </div>
+
+          <a
+            href="{{ url_for('all_posts') }}"
+            class="inline-block mt-8 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors"
+          >
+            Browse All Articles
+          </a>
+        </div>
+
+        {% else %}
+        <!-- Empty Search State -->
+        <div class="text-center py-16">
+          <div class="mb-8">
+            <svg
+              class="w-24 h-24 text-gray-300 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+              Search Our Articles
+            </h3>
+            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+              Enter keywords above to search through our veterinary articles,
+              case studies, and health tips.
+            </p>
+          </div>
+
+          <div
+            class="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto text-sm text-gray-600"
+          >
+            <div class="bg-white p-4 rounded-lg border">
+              <strong class="text-gray-800">Popular Topics:</strong><br />
+              Dog care, Cat health, Surgery tips
+            </div>
+            <div class="bg-white p-4 rounded-lg border">
+              <strong class="text-gray-800">Case Studies:</strong><br />
+              Emergency cases, Treatment plans
+            </div>
+            <div class="bg-white p-4 rounded-lg border">
+              <strong class="text-gray-800">Preventive Care:</strong><br />
+              Vaccinations, Nutrition, Exercise
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </body>
+</html>
