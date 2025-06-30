@@ -23,15 +23,15 @@
       <div class="mb-6">
         {{ form.description.label(class_="block text-white font-semibold
         text-2xl mb-3") }} {{ form.description( class_="w-full bg-gray-800
-        border border-gray-700 text-white rounded-lg px-4 py-2
+        border border-gray-700 text-white rounded-lg px-4 py-2 h-24 resize-y
         focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all",
-        maxlength="150", value=article.description if article and
-        article.description ) }}
+        value=article.description if article and article.description ) }}
         <p class="text-gray-400 text-sm mt-1">
           <span id="desc-counter"
             >{{ article.description|length if article and article.description
             else 0 }}</span
-          >/150 characters
+          >
+          characters (minimum 12)
         </p>
       </div>
 
@@ -238,7 +238,7 @@
       });
   });
 
-  //  character counter
+  // Character counter for description
   document.addEventListener("DOMContentLoaded", function () {
     const descField = document.getElementById("{{ form.description.id }}");
     const counter = document.getElementById("desc-counter");
@@ -250,33 +250,32 @@
 
       // Update counter on input
       descField.addEventListener("input", function () {
-        counter.textContent = this.value.length;
+        const currentLength = this.value.length;
+        counter.textContent = currentLength;
 
-        // Visual feedback when approaching limit
-        if (this.value.length >= 120) {
-          // Yellow at 80% of limit
-          counter.classList.add("text-yellow-500");
-          counter.classList.remove("text-gray-400");
-        } else {
-          counter.classList.remove("text-yellow-500");
-          counter.classList.add("text-gray-400");
-        }
-
-        if (this.value.length >= 150) {
-          // Red at limit
+        // Visual feedback based on minimum requirement
+        if (currentLength < 12) {
+          // Red when below minimum
           counter.classList.add("text-red-500");
+          counter.classList.remove("text-gray-400", "text-green-500");
+        } else if (currentLength >= 12 && currentLength <= 50) {
+          // Green when good length for cards
+          counter.classList.add("text-green-500");
+          counter.classList.remove("text-gray-400", "text-red-500");
         } else {
-          counter.classList.remove("text-red-500");
+          // Gray when longer (still valid)
+          counter.classList.add("text-gray-400");
+          counter.classList.remove("text-red-500", "text-green-500");
         }
       });
 
       // Initialize color based on current length
-      if (initialLength >= 120) {
-        counter.classList.add("text-yellow-500");
-        counter.classList.remove("text-gray-400");
-      }
-      if (initialLength >= 150) {
+      if (initialLength < 12) {
         counter.classList.add("text-red-500");
+      } else if (initialLength >= 12 && initialLength <= 50) {
+        counter.classList.add("text-green-500");
+      } else {
+        counter.classList.add("text-gray-400");
       }
     }
   });

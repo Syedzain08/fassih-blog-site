@@ -34,8 +34,8 @@ class Articles(db.Model):
     slug = db.Column(db.String(255), unique=True, nullable=False)
     thumbnail = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text, nullable=False)
-    description = db.Column(db.String(255), nullable=True)
-    tags = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    tags = db.Column(db.Text, nullable=True)
     author_id = db.Column(db.Integer, db.ForeignKey("Admins.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

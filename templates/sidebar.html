@@ -13,11 +13,13 @@
     <!-- Sidebar Header -->
     <div class="flex items-center justify-between p-6 border-b border-gray-200">
       <div class="flex items-center">
-        <img
-          src="https://res.cloudinary.com/diyv3z5pj/image/upload/v1751118021/Logo2_dh4iwg.png"
-          alt="Logo"
-          class="h-16 w-auto object-contain"
-        />
+        <a href="{{ url_for('index') }}">
+          <img
+            src="https://res.cloudinary.com/diyv3z5pj/image/upload/v1751118021/Logo2_dh4iwg.png"
+            alt="Logo"
+            class="lg:h-[180px] md:h-[150px] h-[120px] object-cover rounded-xl mt-2 mr-12 md:mr-0 lg:mr-0 lg:mb-2"
+          />
+        </a>
       </div>
       <button
         id="close-sidebar"

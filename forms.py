@@ -59,7 +59,7 @@ class DeleteAdminForm(FlaskForm):
 class BlogPostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     description = StringField(
-        "Description", validators=[DataRequired(), Length(min=12, max=150)]
+        "Description", validators=[DataRequired(), Length(min=12)]
     )
     content = TextAreaField("Content")
     tags = StringField("Tags")
