@@ -627,6 +627,7 @@ def blog_redirect():
 
 
 @app.route("/upload_image", methods=["POST"])
+@login_required
 def upload_image():
     try:
 
@@ -663,6 +664,7 @@ def upload_image():
 
 
 @app.route("/upload_video", methods=["POST"])
+@login_required
 def upload_video():
     try:
         if "video" not in request.files:
