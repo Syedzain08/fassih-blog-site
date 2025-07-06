@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-white">
+  <head>
+    <link
+      href="{{ url_for('static', filename='css/main.css') }}"
+      rel="stylesheet"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error {{ error_code }} - Dr. Fassih Ul Abbas</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+  </head>
+
+  {% include 'navbar.html' %}
+
+  <body>
+    <section
+      class="relative min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"
+    >
+      <div class="max-w-2xl mx-auto text-center px-8">
+        <div class="mb-8">
+          <div
+            class="w-24 h-24 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <span class="material-symbols-outlined text-white text-4xl">
+              {% if error_code == 404 %} search_off {% elif error_code == 500 %}
+              error {% elif error_code == 403 %} lock {% elif error_code == 405
+              %} block {% elif error_code == 400 %} warning {% elif error_code
+              == 429 %} hourglass_empty {% elif error_code == 419 %} security {%
+              else %} help {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <h1 class="text-6xl sm:text-8xl font-bold text-gray-800 mb-4">
+          {{ error_code }}
+        </h1>
+
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mb-6">
+          {% if error_code == 404 %} Page Not Found {% elif error_code == 500 %}
+          Internal Server Error {% elif error_code == 403 %} Access Forbidden {%
+          elif error_code == 405 %} Method Not Allowed {% elif error_code == 400
+          %} Bad Request {% elif error_code == 429 %} Too Many Requests {% elif
+          error_code == 419 %} CSRF Token Mismatch {% else %} Something Went
+          Wrong {% endif %}
+        </h2>
+
+        <p class="text-lg text-gray-600 mb-8 max-w-lg mx-auto">
+          {% if message %} {{ message }} {% endif %}
+        </p>
+
+        <div
+          class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+        >
+          <a
+            href="{{ url_for('index') }}"
+            class="inline-flex items-center bg-blue-600 text-white font-semibold px-6 py-3 rounded-full hover:bg-blue-700 transition hover:scale-105"
+          >
+            <span class="material-symbols-outlined mr-2">home</span>
+            Go Home
+          </a>
+
+          <button
+            onclick="history.back()"
+            class="inline-flex items-center hover:cursor-pointer bg-white text-blue-600 font-semibold px-6 py-3 rounded-full border-2 border-blue-600 hover:bg-blue-50 transition hover:scale-105"
+          >
+            <span class="material-symbols-outlined mr-2">arrow_back</span>
+            Go Back
+          </button>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <p class="text-gray-500 mb-4">Need help? Get in touch:</p>
+          <div class="flex justify-center space-x-6">
+            <a
+              href="tel:+92 302 5082744"
+              class="flex items-center text-gray-600 hover:text-blue-600 transition"
+            >
+              <span class="material-symbols-outlined mr-2">phone</span>
+              Call Us
+            </a>
+            <a
+              href="https://www.linkedin.com/in/fassih-ul-abbas-01240b247"
+              target="_blank"
+              class="flex items-center text-gray-600 hover:text-blue-600 transition"
+            >
+              <span class="material-symbols-outlined mr-2">person</span>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

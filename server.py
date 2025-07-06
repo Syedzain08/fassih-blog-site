@@ -15,7 +15,7 @@ from flask_login import (
     login_required,
     current_user,
 )
-from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_mail import Mail
 from db_models import db, Admins, Articles
 from forms import *
@@ -471,7 +471,7 @@ def edit_post(post_id):
     )
 
 
-@app.route("/articles/<int:article_id>/delete", methods=["POST", "GET"])
+@app.route("/articles/<int:article_id>/delete", methods=["POST"])
 @login_required
 def delete_article(article_id):
 
@@ -584,19 +584,17 @@ def all_posts():
 
     query = Articles.query
 
-    # Handle status filtering
     if current_user.is_authenticated:
         if status_filter == "public":
             query = query.filter(Articles.status == "public")
         elif status_filter == "private":
             query = query.filter(Articles.status == "private")
-        # If status_filter == "all", don't add any status filter (show all posts)
-    else:
-        # Non-authenticated users can only see public posts
-        query = query.filter(Articles.status == "public")
-        status_filter = "public"  # Force status to public for non-authenticated users
 
-    # Handle sorting
+    else:
+
+        query = query.filter(Articles.status == "public")
+        status_filter = "public"
+
     if sort_by == "newest":
         query = query.order_by(desc(Articles.created_at))
     elif sort_by == "oldest":
@@ -696,6 +694,102 @@ def upload_video():
     except Exception as e:
         app.logger.error(f"Video upload error: {str(e)}")
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=404,
+            message="The page you're looking for doesn't exist.",
+        ),
+        404,
+    )
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=500,
+            message="We're experiencing technical difficulties. Please try again later.",
+        ),
+        500,
+    )
+
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=403,
+            message="You don't have permission to access this resource.",
+        ),
+        403,
+    )
+
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=405,
+            message="The method you're using is not allowed for this endpoint.",
+        ),
+        405,
+    )
+
+
+@app.errorhandler(400)
+def bad_request_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=400,
+            message="The request couldn't be understood. Please check your input.",
+        ),
+        400,
+    )
+
+
+@app.errorhandler(429)
+def too_many_requests_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=429,
+            message="You're sending too many requests. Please slow down and try again in a few minutes.",
+        ),
+        429,
+    )
+
+
+@app.errorhandler(CSRFError)
+def csrf_error(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=419,
+            message="Your session has expired for security reasons. Please refresh the page and try again.",
+        ),
+        419,
+    )
+
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    return (
+        render_template(
+            "error.html",
+            error_code=500,
+            message="An unexpected error occurred. Please try again later.",
+        ),
+        500,
+    )
 
 
 if __name__ == "__main__":
