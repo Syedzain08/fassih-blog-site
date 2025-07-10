@@ -56,7 +56,7 @@ class DeleteAdminForm(FlaskForm):
     submit = SubmitField("Delete Admin")
 
 
-class BlogPostForm(FlaskForm):
+class AddArticleForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     description = StringField(
         "Description", validators=[DataRequired(), Length(min=12)]

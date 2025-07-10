@@ -1,5 +1,5 @@
-{% extends "admin/base.html" %} {% block title %}Manage Admins - Admin Panel{%
-endblock %} {% block body %}
+{% extends "admin/base.html" %} {% block title %}Manage Admins{% endblock %} {%
+block body %}
 <!-- Header -->
 <div
   class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4"
@@ -7,7 +7,7 @@ endblock %} {% block body %}
   <div>
     <h2 class="text-xl sm:text-2xl font-bold text-white">Manage Admins</h2>
     <p class="text-gray-400 text-sm sm:text-base mt-1">
-      Manage administrator accounts and permissions
+      Manage administrator accounts
     </p>
   </div>
   <button
@@ -123,7 +123,7 @@ endblock %} {% block body %}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
             <button
-              class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-admin-btn {%if admin.is_superadmin%} hidden {% endif %} p-2"
+              class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-admin-btn {% if admin.is_superadmin %} hidden {% endif %} p-2"
               data-admin-id="{{ admin.id }}"
               data-admin-name="{{ admin.username }}"
             >
@@ -145,7 +145,7 @@ endblock %} {% block body %}
 >
   <form
     method="POST"
-    action="{{ url_for('add_admin') }}"
+    action="{{ url_for('admin.add_admin') }}"
     class="bg-gray-900 rounded-lg border border-gray-800 w-full max-w-md mx-4"
   >
     {{ form.hidden_tag() }}
@@ -207,7 +207,7 @@ endblock %} {% block body %}
 >
   <form
     method="POST"
-    action="{{ url_for('delete_admin') }}"
+    action="{{ url_for('admin.delete_admin') }}"
     class="bg-gray-900 rounded-lg border border-gray-800 w-full max-w-md mx-4"
   >
     {{ delete_form.csrf_token }}
@@ -260,5 +260,5 @@ endblock %} {% block body %}
   </form>
 </div>
 
-<script src="{{ url_for('static', filename='js/manage-admins.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='manage-admins.js') }}"></script>
 {% endblock %}

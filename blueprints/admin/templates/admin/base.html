@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}{% endblock %}</title>
+    <title>Admin Panel - {% block title %}{% endblock %}</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -16,7 +16,9 @@
     {% block head %} {% endblock %}
   </head>
   <body class="bg-black text-white min-h-screen">
-    {% include 'alert.html' %} {% include 'admin/navbar.html' %}
+    {% set alert_color = "bg-gradient-to-r from-slate-800 via-blue-800
+    to-slate-900" %} {% include 'alert.html' with context %} {% include
+    'admin/navbar.html' %}
     <!-- Mobile menu button -->
     <div class="md:hidden bg-gray-900 p-4">
       <button id="mobile-menu-button" class="text-gray-300 hover:text-white">

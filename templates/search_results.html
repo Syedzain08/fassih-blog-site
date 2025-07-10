@@ -78,7 +78,7 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {% for article in articles %}
           <a
-            href="{{ url_for('view_post', slug=article.slug) }}"
+            href="{{ url_for('blog.view_article', slug=article.slug) }}"
             class="block bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-gray-100"
           >
             <img
@@ -187,7 +187,7 @@
           </div>
 
           <a
-            href="{{ url_for('all_posts') }}"
+            href="{{ url_for('blog.all_articles') }}"
             class="inline-block mt-8 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors"
           >
             Browse All Articles
