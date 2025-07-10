@@ -123,6 +123,12 @@ ALLOWED_VIDEO_EXTENSIONS = {"mp4", "mov", "avi", "webm"}
 
 
 def allowed_video_file(filename):
+    """
+    Check if a filename has an allowed video file extension.
+    
+    Returns:
+        bool: True if the filename has a valid video extension, otherwise False.
+    """
     return (
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
@@ -130,5 +136,14 @@ def allowed_video_file(filename):
 
 
 def generate_throwaway_password(length=12):
+    """
+    Generate a random alphanumeric password of the specified length.
+    
+    Parameters:
+        length (int): The desired length of the generated password. Defaults to 12.
+    
+    Returns:
+        str: A randomly generated password containing uppercase letters, lowercase letters, and digits.
+    """
     characters = string.ascii_letters + string.digits
     return "".join(secrets.choice(characters) for _ in range(length))

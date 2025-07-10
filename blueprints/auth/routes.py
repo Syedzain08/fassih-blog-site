@@ -24,6 +24,11 @@ auth_bp = Blueprint("auth", __name__, template_folder="templates", url_prefix="/
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
 
+    """
+    Handles user login by validating credentials and managing user sessions.
+    
+    Redirects authenticated users to the admin dashboard. On form submission, verifies the provided username and password against stored credentials. If authentication succeeds, logs in the user and redirects to the admin dashboard; otherwise, displays an error message and reloads the login page. Renders the login form for GET requests or invalid submissions.
+    """
     if current_user.is_authenticated:
         flash("You are already logged in.", "info")
         return redirect(url_for("admin.admin_dashboard"))
@@ -49,6 +54,9 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
+    """
+    Logs out the current user and redirects to the login page with a logout confirmation message.
+    """
     logout_user()
     flash("You have been logged out.", "info")
     return redirect(url_for("auth.login"))
@@ -57,6 +65,11 @@ def logout():
 @auth_bp.route("/forgot-username", methods=["GET", "POST"])
 def forgot_username():
 
+    """
+    Handles username recovery by email for users who have forgotten their username.
+    
+    If the submitted email matches a registered user, sends an email containing the username to that address. Redirects authenticated users to the admin dashboard. Displays appropriate flash messages for success, user-not-found, or email sending errors.
+    """
     form = ForgotUsernameOrPassword()
 
     if current_user.is_authenticated:
@@ -94,6 +107,11 @@ def forgot_username():
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
+    """
+    Handles password reset requests by generating a secure token, storing it with an expiry, and emailing a password reset link to the user if the provided email exists.
+    
+    Renders the password reset request form on GET or invalid submission. If the email is associated with a user, sends a password reset email with a time-limited link; otherwise, flashes an error message.
+    """
     form = ForgotUsernameOrPassword()
 
     if current_user.is_authenticated:
@@ -144,6 +162,15 @@ def forgot_password():
 
 @auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
+    """
+    Handles password reset via a secure token, allowing users to set a new password if the token is valid and not expired.
+    
+    Parameters:
+        token (str): The password reset token provided in the reset link.
+    
+    Returns:
+        Response: Renders the password reset form, redirects to login on success, or redirects with error messages if the token is invalid, expired, or if password validation fails.
+    """
     form = ResetPasswordForm()
 
     if current_user.is_authenticated:

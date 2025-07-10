@@ -28,6 +28,11 @@ blog_bp = Blueprint(
 
 @blog_bp.route("/")
 def all_articles():
+    """
+    Display a paginated list of articles with optional sorting and status filtering.
+    
+    Retrieves articles from the database based on query parameters for page number, sort order, and status (public or private). Only public articles are shown to unauthenticated users. Supports sorting by newest, oldest, popularity, or title. Renders the articles and pagination metadata in the blog listing template.
+    """
     page = request.args.get("page", 1, type=int)
     sort_by = request.args.get("sort", "newest")
     status_filter = request.args.get("status", "public")
@@ -75,6 +80,11 @@ def all_articles():
 
 @blog_bp.route("/<string:slug>", methods=["GET"])
 def view_article(slug):
+    """
+    Display a single article by its slug, incrementing its view count and showing related posts.
+    
+    If the article does not exist or is private and the user is not authenticated, redirects to the index page with an error message. On success, renders the article and up to three related posts (excluding the current one), filtering related posts by public status for unauthenticated users. Rolls back the database session and redirects with an error message if an exception occurs.
+    """
     try:
 
         article = Articles.query.filter_by(slug=slug).first()
@@ -121,5 +131,7 @@ def view_article(slug):
 @blog_bp.route("/blog")
 @blog_bp.route("/posts")
 def blog_redirect():
-    """Redirect common blog URLs to the main articles page"""
+    """
+    Redirects requests from legacy blog URLs to the main articles listing page with a permanent (301) redirect.
+    """
     return redirect(url_for("blog.all_articles"), code=301)

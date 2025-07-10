@@ -75,12 +75,26 @@ config(
 # --- User Loader --- #
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Retrieves an Admin user instance by user ID for Flask-Login session management.
+    
+    Parameters:
+        user_id (int or str): The unique identifier of the admin user.
+    
+    Returns:
+        Admins or None: The Admin user object if found, otherwise None.
+    """
     return Admins.query.get(int(user_id))
 
 
 # --- Public Routes --- #
 @app.route("/", methods=["GET"])
 def index():
+    """
+    Render the homepage with a list of all public articles, ensuring each has a description.
+    
+    Articles without a description will have their description set to the first sentence of their content before rendering.
+    """
     articles = (
         Articles.query.filter(Articles.status != "private")
         .order_by(Articles.created_at.desc())
@@ -95,6 +109,11 @@ def index():
 
 @app.route("/search")
 def search():
+    """
+    Handles article search requests by querying public articles matching the search term in title, description, content, or tags.
+    
+    If the query parameter is empty, returns an empty result set. Otherwise, performs a case-insensitive search, paginates results (12 per page), and renders the search results page with matching articles and pagination details.
+    """
     query = request.args.get("q", "").strip()
     page = request.args.get("page", 1, type=int)
     per_page = 12
@@ -135,6 +154,12 @@ def search():
 @app.route("/upload_image", methods=["POST"])
 @login_required
 def upload_image():
+    """
+    Handles authenticated image uploads, resizes and converts images to WEBP format, uploads them to Cloudinary, and returns the image URL in a JSON response.
+    
+    Returns:
+        JSON response containing the upload status and, if successful, the URL of the uploaded image.
+    """
     try:
 
         if "image" not in request.files:
@@ -172,6 +197,12 @@ def upload_image():
 @app.route("/upload_video", methods=["POST"])
 @login_required
 def upload_video():
+    """
+    Handles authenticated video file uploads, validates the file, uploads it to Cloudinary, and returns the video URL in a JSON response.
+    
+    Returns:
+        Response: A JSON object indicating success and the uploaded video's URL, or an error message with the appropriate HTTP status code.
+    """
     try:
         if "video" not in request.files:
             return jsonify({"success": False, "error": "No video uploaded"}), 400
@@ -202,6 +233,12 @@ def upload_video():
 # --- Error Handlers --- #
 @app.errorhandler(400)
 def bad_request_error(error):
+    """
+    Render a 400 Bad Request error page with a user-friendly message.
+    
+    Returns:
+        A tuple containing the rendered error template and the HTTP 400 status code.
+    """
     return (
         render_template(
             "error.html",
@@ -214,6 +251,12 @@ def bad_request_error(error):
 
 @app.errorhandler(403)
 def forbidden_error(error):
+    """
+    Render a 403 Forbidden error page when a user attempts to access a resource without permission.
+    
+    Returns:
+        A tuple containing the rendered error page and the HTTP 403 status code.
+    """
     return (
         render_template(
             "error.html",
@@ -226,6 +269,12 @@ def forbidden_error(error):
 
 @app.errorhandler(404)
 def not_found_error(error):
+    """
+    Render a custom 404 error page when a requested resource is not found.
+    
+    Returns:
+        A tuple containing the rendered error template and the HTTP 404 status code.
+    """
     return (
         render_template(
             "error.html",
@@ -238,6 +287,12 @@ def not_found_error(error):
 
 @app.errorhandler(405)
 def method_not_allowed_error(error):
+    """
+    Render a 405 error page when a request uses an unsupported HTTP method.
+    
+    Returns:
+        A tuple containing the rendered error page and the HTTP 405 status code.
+    """
     return (
         render_template(
             "error.html",
@@ -250,6 +305,12 @@ def method_not_allowed_error(error):
 
 @app.errorhandler(429)
 def too_many_requests_error(error):
+    """
+    Render a 429 error page when the user exceeds the allowed number of requests.
+    
+    Returns:
+        A tuple containing the rendered error page and the HTTP status code 429.
+    """
     return (
         render_template(
             "error.html",
@@ -262,6 +323,12 @@ def too_many_requests_error(error):
 
 @app.errorhandler(500)
 def internal_error(error):
+    """
+    Handles HTTP 500 Internal Server Error by rendering a user-friendly error page.
+    
+    Returns:
+        A tuple containing the rendered error template and the HTTP status code 500.
+    """
     return (
         render_template(
             "error.html",
@@ -274,6 +341,9 @@ def internal_error(error):
 
 @app.errorhandler(CSRFError)
 def csrf_error(error):
+    """
+    Handle CSRF token errors by rendering a 419 error page indicating session expiration.
+    """
     return (
         render_template(
             "error.html",
@@ -286,6 +356,12 @@ def csrf_error(error):
 
 @app.errorhandler(Exception)
 def handle_exception(error):
+    """
+    Handles uncaught exceptions by rendering a generic 500 error page with a user-friendly message.
+    
+    Returns:
+        A tuple containing the rendered error template and the HTTP 500 status code.
+    """
     return (
         render_template(
             "error.html",
