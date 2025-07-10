@@ -1,25 +1,23 @@
-{% extends "admin/base.html" %} {% block title %}Manage Posts - Admin Panel{%
-endblock %} {% block body %}
+{% extends "admin/base.html" %} {% block title %}Manage Articles{% endblock %}
+{% block body %}
 <!-- Header -->
 <div
   class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4"
 >
   <div>
-    <h2 class="text-xl sm:text-2xl font-bold text-white">Manage Posts</h2>
-    <p class="text-gray-400 text-sm sm:text-base mt-1">
-      Manage all blog posts and articles
-    </p>
+    <h2 class="text-xl sm:text-2xl font-bold text-white">Manage Articles</h2>
+    <p class="text-gray-400 text-sm sm:text-base mt-1">Manage all articles</p>
   </div>
   <a
-    href="{{ url_for('add_post') }}"
+    href="{{ url_for('admin.add_article') }}"
     class="bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base w-full sm:w-auto"
   >
     <i class="fas fa-plus"></i>
-    <span>Add Post</span>
+    <span>Add Article</span>
   </a>
 </div>
 
-<!-- Posts Table -->
+<!-- Articles Table -->
 <div class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
   <!-- Mobile Cards (visible on small screens) -->
   <div class="block md:hidden">
@@ -38,7 +36,7 @@ endblock %} {% block body %}
                 {{ article.title }}
               </div>
               <a
-                href="{{ url_for('view_post', slug=article.slug) }}"
+                href="{{ url_for('blog.view_article', slug=article.slug) }}"
                 target="_blank"
                 class="text-xs text-blue-400 hover:text-blue-300 hover:underline"
               >
@@ -58,15 +56,15 @@ endblock %} {% block body %}
         </div>
         <div class="flex justify-end space-x-3">
           <a
-            href="{{ url_for('edit_post', post_id=article.id) }}"
+            href="{{ url_for('admin.edit_article', article_id=article.id) }}"
             class="text-blue-400 hover:text-blue-300 transition-colors duration-200 p-2"
           >
             <i class="fas fa-edit"></i>
           </a>
           <button
-            class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-post-btn p-2"
-            data-post-id="{{ article.id }}"
-            data-post-title="{{ article.title }}"
+            class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-article-btn p-2"
+            data-article-id="{{ article.id|e }}"
+            data-article-title="{{ article.title|e }}"
           >
             <i class="fas fa-trash"></i>
           </button>
@@ -144,7 +142,7 @@ endblock %} {% block body %}
             class="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300"
           >
             <a
-              href="{{ url_for('view_post', slug=article.slug) }}"
+              href="{{ url_for('blog.view_article', slug=article.slug) }}"
               target="_blank"
               class="hover:underline"
             >
@@ -169,15 +167,15 @@ endblock %} {% block body %}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
             <a
-              href="{{ url_for('edit_post', post_id=article.id) }}"
+              href="{{ url_for('admin.edit_article', article_id=article.id) }}"
               class="text-blue-400 hover:text-blue-300 transition-colors duration-200 p-2"
             >
               <i class="fas fa-edit"></i>
             </a>
             <button
-              class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-post-btn p-2"
-              data-post-id="{{ article.id }}"
-              data-post-title="{{ article.title }}"
+              class="text-red-400 hover:text-red-300 transition-colors duration-200 delete-article-btn p-2"
+              data-article-id="{{ article.id }}"
+              data-article-title="{{ article.title }}"
             >
               <i class="fas fa-trash"></i>
             </button>
@@ -189,9 +187,9 @@ endblock %} {% block body %}
   </div>
 </div>
 
-<!-- Delete Post Modal -->
+<!-- Delete Article Modal -->
 <div
-  id="delete-post-modal"
+  id="delete-article-modal"
   class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 z-50 hidden"
 >
   <div
@@ -199,9 +197,9 @@ endblock %} {% block body %}
   >
     <div class="p-4 sm:p-6">
       <div class="flex justify-between items-center mb-4 sm:mb-6">
-        <h3 class="text-lg font-semibold text-white">Delete Post</h3>
+        <h3 class="text-lg font-semibold text-white">Delete Article</h3>
         <button
-          id="close-delete-post-modal"
+          id="close-delete-article-modal"
           type="button"
           class="text-gray-400 hover:text-white p-1 hover:cursor-pointer"
         >
@@ -218,21 +216,21 @@ endblock %} {% block body %}
         <p class="text-gray-300 text-center text-sm sm:text-base">
           Are you sure you want to delete
           <span
-            id="post-title-to-delete"
+            id="article-title-to-delete"
             class="font-semibold text-white"
           ></span
           >? This action cannot be undone.
         </p>
       </div>
 
-      <form method="POST" action="" id="delete-post-form">
+      <form method="POST" action="" id="delete-article-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div
           class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3"
         >
           <button
             type="button"
-            id="cancel-delete-post"
+            id="cancel-delete-article"
             class="px-4 py-2 text-gray-400 hover:text-white transition-colors duration-200 order-2 sm:order-1 hover:cursor-pointer"
           >
             Cancel
@@ -241,7 +239,7 @@ endblock %} {% block body %}
             type="submit"
             class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 order-1 sm:order-2 hover:cursor-pointer"
           >
-            Delete Post
+            Delete Article
           </button>
         </div>
       </form>
@@ -250,23 +248,25 @@ endblock %} {% block body %}
 </div>
 
 <script>
-  // Delete Post Confirmation
+  // Delete Article Confirmation
   document.addEventListener("DOMContentLoaded", function () {
-    const deleteButtons = document.querySelectorAll(".delete-post-btn");
-    const deleteModal = document.getElementById("delete-post-modal");
-    const postTitleSpan = document.getElementById("post-title-to-delete");
-    const deleteForm = document.getElementById("delete-post-form");
-    const closeDeleteModal = document.getElementById("close-delete-post-modal");
-    const cancelDelete = document.getElementById("cancel-delete-post");
+    const deleteButtons = document.querySelectorAll(".delete-article-btn");
+    const deleteModal = document.getElementById("delete-article-modal");
+    const articleTitleSpan = document.getElementById("article-title-to-delete");
+    const deleteForm = document.getElementById("delete-article-form");
+    const closeDeleteModal = document.getElementById(
+      "close-delete-article-modal"
+    );
+    const cancelDelete = document.getElementById("cancel-delete-article");
 
     deleteButtons.forEach((button) => {
       button.addEventListener("click", function () {
-        const postId = this.getAttribute("data-post-id");
-        const postTitle = this.getAttribute("data-post-title");
+        const articleId = this.getAttribute("data-article-id");
+        const articleTitle = this.getAttribute("data-article-title");
 
         // Set the form action with the article_id
-        deleteForm.action = `/articles/${postId}/delete`;
-        postTitleSpan.textContent = `"${postTitle}"`;
+        deleteForm.action = `/admin/articles/${articleId}/delete`;
+        articleTitleSpan.textContent = `"${articleTitle}"`;
         deleteModal.classList.replace("hidden", "flex");
       });
     });

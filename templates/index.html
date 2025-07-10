@@ -1,20 +1,97 @@
 <!DOCTYPE html>
 <html lang="en" class="bg-white">
   <head>
+    <!-- Basic Meta Tags -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dr. Fassih Ul Abbas – Veterinary Blog & Pet Health Resources</title>
+    <meta
+      name="description"
+      content="Welcome to Dr. Fassih Ul Abbas's official website. Discover expert veterinary insights, pet health tips, and clinical experience for both small and large animals."
+    />
+    <meta
+      name="keywords"
+      content="Dr. Fassih Ul Abbas, veterinarian, pet care, animal health, veterinary blog, Lahore vet"
+    />
+    <meta name="author" content="Dr. Fassih Ul Abbas" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="{{ request.url }}" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Dr. Fassih Ul Abbas – Veterinary Blog & Pet Health Resources"
+    />
+    <meta
+      property="og:description"
+      content="Explore trusted insights and tips on pet health and veterinary care by Dr. Fassih Ul Abbas, RVMP."
+    />
+    <meta
+      property="og:image"
+      content="{{ url_for('static', filename='img/hero-portrait.png', _external=True) }}"
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:site_name" content="Dr. Fassih Ul Abbas | Vet Blog" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Dr. Fassih Ul Abbas – Veterinary Blog & Pet Health Resources"
+    />
+    <meta
+      name="twitter:description"
+      content="Explore trusted insights and tips on pet health and veterinary care by Dr. Fassih Ul Abbas, RVMP."
+    />
+    <meta
+      name="twitter:image"
+      content="{{ url_for('static', filename='img/hero-portrait.png', _external=True) }}"
+    />
+
+    <!-- Schema.org JSON-LD for Homepage -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Dr. Fassih Ul Abbas",
+        "jobTitle": "Veterinary Medical Practitioner",
+        "description": "Registered veterinarian offering professional pet healthcare advice and services. Based in Lahore, Pakistan and affiliated with PVMC and CVMA.",
+        "url": "{{ url_for('index', _external=True) }}",
+        "image": "{{ url_for('static', filename='img/hero-portrait.png', _external=True) }}",
+        "sameAs": [
+          "https://www.facebook.com/share/1M42mRJGij/",
+          "https://www.instagram.com/fassih_rajpoot",
+          "https://www.linkedin.com/in/fassih-ul-abbas-01240b247"
+        ]
+      }
+    </script>
+
+    <!-- Styles & Fonts -->
     <link
       href="{{ url_for('static', filename='css/main.css') }}"
       rel="stylesheet"
     />
-
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
-    <link rel="stylesheet" href="" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
     />
-    <script src="../static/js/alert-dismissal.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <!-- Preload Hero Image -->
+    <link
+      rel="preload"
+      as="image"
+      href="{{ url_for('static', filename='img/hero-portrait.png') }}"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="{{ url_for('static', filename='img/hero-bg.svg') }}"
+    />
   </head>
   {% include 'navbar.html' %} {% include 'alert.html' %}
 
@@ -267,7 +344,7 @@
         <div class="flex justify-between items-center mb-10">
           <h2 class="text-3xl font-bold text-gray-800">Recent Blog Posts</h2>
           <a
-            href="{{ url_for('all_posts')  }}"
+            href="{{ url_for('blog.all_articles')  }}"
             class="text-blue-600 font-medium hover:underline whitespace-nowrap text-base sm:text-inherit"
           >
             See All →
@@ -278,7 +355,7 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {% for article in articles[:6] %}
           <a
-            href="{{ url_for('view_post', slug=article.slug) }}"
+            href="{{ url_for('blog.view_article', slug=article.slug) }}"
             class="block bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-gray-100"
           >
             <img

@@ -5,6 +5,8 @@ from bcrypt import hashpw, gensalt, checkpw
 from bs4 import BeautifulSoup
 from re import search
 from slugify import slugify
+import string
+import secrets
 
 
 # --- Functions --- #
@@ -125,3 +127,8 @@ def allowed_video_file(filename):
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS
     )
+
+
+def generate_throwaway_password(length=12):
+    characters = string.ascii_letters + string.digits
+    return "".join(secrets.choice(characters) for _ in range(length))
