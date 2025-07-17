@@ -406,9 +406,9 @@ def process_checkout():
         server.quit()
 
         return redirect(url_for("store.thank_you", order_id=order.id))
-    except Exception:
+    except Exception as e:
         db.session.rollback()
-        flash(f"A Fatal Error Occured While placing your order", "danger")
+        flash(f"A Fatal Error Occured While placing your order {e}", "danger")
         return redirect(url_for("index"))
 
 
