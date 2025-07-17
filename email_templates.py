@@ -2,8 +2,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from json import loads
-from zoneinfo import ZoneInfo
 from db_models import Products
+from pytz import timezone
+
+
+karachi_tz = timezone("Asia/Karachi")
 
 
 def create_username_recovery_email(username, recipient_email):
@@ -230,7 +233,8 @@ def create_order_confirmation_email(order, recipient_email):
     Returns:
         MIMEMultipart: Formatted email message ready to send
     """
-    created_at_local = order.created_at.astimezone(ZoneInfo("Asia/Karachi"))
+
+    created_at_local = order.created_at.astimezone(karachi_tz)
     formatted_date = created_at_local.strftime("%B %d, %Y at %I:%M %p")
 
     msg = MIMEMultipart("alternative")
@@ -472,7 +476,7 @@ def create_admin_order_alert_email(order, admin_email):
     msg["From"] = "Vet Insights Order System <blogs.fassih@gmail.com>"
     msg["To"] = admin_email
 
-    created_at_local = order.created_at.astimezone(ZoneInfo("Asia/Karachi"))
+    created_at_local = order.created_at.astimezone(karachi_tz)
     formatted_date = created_at_local.strftime("%B %d, %Y at %I:%M %p")
 
     items_html = ""
@@ -608,7 +612,7 @@ def create_order_completion_email(order, recipient_email):
     msg["From"] = "Vet Insights <blogs.fassih@gmail.com>"
     msg["To"] = recipient_email
 
-    created_at_local = order.created_at.astimezone(ZoneInfo("Asia/Karachi"))
+    created_at_local = order.created_at.astimezone(karachi_tz)
     formatted_date = created_at_local.strftime("%B %d, %Y at %I:%M %p")
 
     text = f"""
