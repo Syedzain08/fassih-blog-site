@@ -4,7 +4,7 @@
   <div class="w-full">
     <div class="flex justify-between items-center h-18">
       <!-- Logo -->
-      <div class="flex items-start">
+      <div class="flex items-start overflow-hidden">
         <a href="{{ url_for('index') }}">
           <img
             src="https://res.cloudinary.com/diyv3z5pj/image/upload/v1751118021/Logo2_dh4iwg.png"
@@ -46,6 +46,11 @@
           >About</a
         >
         <a
+          href="{{ url_for('index') }}#featured-products"
+          class="text-gray-700 hover:text-blue-600 transition"
+          >Store</a
+        >
+        <a
           href="{{ url_for('index') }}#recent-blog"
           class="text-gray-700 hover:text-blue-600 transition"
           >Blog</a
@@ -54,6 +59,12 @@
           href="{{ url_for('index') }}#contact"
           class="text-gray-700 hover:text-blue-600 transition"
           >Contact</a
+        >
+
+        <a
+          href="{{ url_for('store.cart') }}"
+          class="text-gray-700 hover:text-blue-600 transition"
+          ><span class="material-symbols-outlined"> shopping_cart </span></a
         >
       </div>
 

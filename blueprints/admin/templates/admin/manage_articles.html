@@ -17,6 +17,97 @@
   </a>
 </div>
 
+<div class="bg-gray-900 rounded-lg border border-gray-800 p-4 mb-6">
+  <div class="flex flex-col gap-4">
+    <!-- Search Box -->
+    <div class="w-full">
+      <label class="block text-sm font-medium text-gray-300 mb-2">Search Articles</label>
+      <div class="relative">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search by name, description, tags....."
+          value="{{ search_query if search_query else '' }}"
+          class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div class="absolute left-3 top-2.5 text-gray-400">
+          <i class="fas fa-search"></i>
+        </div>
+        {% if search_query %}
+        <button
+          id="clear-search"
+          class="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Existing Filters -->
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <!-- Status Filter -->
+      <div class="flex-1 min-w-0">
+        <label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
+        <select
+          id="status-filter"
+          class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+         <option value="all" {% if current_status == 'all' %}selected{% endif %}>
+                  All Status
+                </option>
+                <option value="public" {% if current_status == 'public' %}selected{% endif %}>
+                  Public
+                </option>
+                <option value="private" {% if current_status == 'private' %}selected{% endif %}>
+                  Private
+                </option>
+        </select>
+      </div>
+
+      <!-- Sort By -->
+      <div class="flex-1 min-w-0">
+        <label class="block text-sm font-medium text-gray-300 mb-2">Sort by</label>
+        <select
+          id="sort-filter"
+          class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option
+                  value="newest"
+                  {% if current_sort == 'newest' %}selected{% endif %}
+                >
+                  Newest First
+                </option>
+                <option
+                  value="oldest"
+                  {% if current_sort == 'oldest' %}selected{% endif %}
+                >
+                  Oldest First
+                </option>
+                <option
+                  value="popular"
+                  {% if current_sort == 'popular' %}selected{% endif %}
+                >
+                  Most Popular
+                </option>
+                <option
+                  value="title_asc"
+                  {% if current_sort == 'title_asc' %}selected{% endif %}
+                >
+                  Title A-Z
+                </option>
+                <option
+                  value="title_desc"
+                  {% if current_sort == 'title_desc' %}selected{% endif %}
+                >
+                  Title Z-A
+                </option>
+        
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Articles Table -->
 <div class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
   <!-- Mobile Cards (visible on small screens) -->
@@ -187,6 +278,73 @@
   </div>
 </div>
 
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <!-- Page Info -->
+  <div class="text-sm text-gray-400">
+    Showing {{ pagination.per_page * (pagination.page - 1) + 1 }} to 
+    {{ pagination.per_page * pagination.page if pagination.page < pagination.pages else total_articles }} 
+    of {{ total_articles }} articles
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="flex items-center space-x-2">
+    <!-- Previous Button -->
+    {% if pagination.has_prev %}
+    <a
+      href="{{ url_for('admin.manage_articles', page=pagination.prev_num, sort=current_sort, status=current_status) }}"
+      class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center"
+    >
+      <i class="fas fa-chevron-left mr-1"></i>
+      Previous
+    </a>
+    {% else %}
+    <span class="px-3 py-2 bg-gray-800 text-gray-500 rounded-lg cursor-not-allowed flex items-center">
+      <i class="fas fa-chevron-left mr-1"></i>
+      Previous
+    </span>
+    {% endif %}
+
+    <!-- Page Numbers -->
+    {% for page_num in pagination.iter_pages() %}
+      {% if page_num %}
+        {% if page_num != pagination.page %}
+        <a
+          href="{{ url_for('admin.manage_articles', page=page_num, sort=current_sort, status=current_status) }}"
+          class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+        >
+          {{ page_num }}
+        </a>
+        {% else %}
+        <span class="px-3 py-2 bg-blue-600 text-white rounded-lg">
+          {{ page_num }}
+        </span>
+        {% endif %}
+      {% else %}
+        <span class="px-3 py-2 text-gray-500">…</span>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Next Button -->
+    {% if pagination.has_next %}
+    <a
+      href="{{ url_for('admin.manage_articles', page=pagination.next_num, sort=current_sort, status=current_status) }}"
+      class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center"
+    >
+      Next
+      <i class="fas fa-chevron-right ml-1"></i>
+    </a>
+    {% else %}
+    <span class="px-3 py-2 bg-gray-800 text-gray-500 rounded-lg cursor-not-allowed flex items-center">
+      Next
+      <i class="fas fa-chevron-right ml-1"></i>
+    </span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 <!-- Delete Article Modal -->
 <div
   id="delete-article-modal"
@@ -250,6 +408,47 @@
 <script>
   // Delete Article Confirmation
   document.addEventListener("DOMContentLoaded", function () {
+
+
+    const statusFilter = document.getElementById("status-filter");
+  const sortFilter = document.getElementById("sort-filter");
+  const searchInput = document.getElementById("search-input");
+  const clearSearch = document.getElementById("clear-search");
+
+  function updateFilters() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set("status", statusFilter.value);
+    currentUrl.searchParams.set("sort", sortFilter.value);
+    
+    const searchValue = searchInput.value.trim();
+    if (searchValue) {
+      currentUrl.searchParams.set("q", searchValue);
+    } else {
+      currentUrl.searchParams.delete("q");
+    }
+    
+    currentUrl.searchParams.set("page", "1"); // Reset to first page
+    window.location.href = currentUrl.toString();
+  }
+
+  // Search on Enter key
+  searchInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      updateFilters();
+    }
+  });
+
+  // Clear search functionality
+  if (clearSearch) {
+    clearSearch.addEventListener("click", function() {
+      searchInput.value = "";
+      updateFilters();
+    });
+  }
+
+  statusFilter.addEventListener("change", updateFilters);
+  sortFilter.addEventListener("change", updateFilters);
+
     const deleteButtons = document.querySelectorAll(".delete-article-btn");
     const deleteModal = document.getElementById("delete-article-modal");
     const articleTitleSpan = document.getElementById("article-title-to-delete");

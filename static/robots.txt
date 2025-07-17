@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin
+Disallow: /auth
+Disallow: /store/checkout
+Disallow: /store/cart
+Disallow: /store/clear-cart
+Disallow: /store/remove-from-cart
+Disallow: /store/thank-you
+Disallow: /upload_image
+Disallow: /upload_video
+
+Sitemap: https://vet-insights.com/sitemap.xml

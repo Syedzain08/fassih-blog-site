@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thank You - Vet Insights</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="bg-gray-50 font-sans">
+    {% include 'alert.html' %}
+    <div class="min-h-screen flex items-center justify-center px-4">
+      <div
+        class="bg-white p-8 rounded-2xl shadow-lg max-w-lg w-full text-center"
+      >
+        <div class="text-green-500 text-6xl mb-4">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Thank You!</h1>
+        <p class="text-gray-600 text-base mb-2">
+          Your order has been successfully placed.
+        </p>
+        <p class="text-gray-500 text-sm mb-4">
+          A confirmation email has been sent to
+          <span class="font-medium text-gray-700">{{ order.email }}</span>.
+        </p>
+        <p class="text-sm text-gray-500 mb-6">
+          Your Order ID is:
+          <span class="font-mono font-semibold text-blue-600"
+            >{{ order.id }}</span
+          >
+        </p>
+
+        <a
+          href="{{ url_for('store.store_page') }}"
+          class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+        >
+          Continue Shopping
+        </a>
+
+        <!-- Order Summary -->
+        <div class="mt-8 text-left border-t pt-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-800">
+            Order Summary
+          </h2>
+          <ul class="text-sm text-gray-700 space-y-3">
+            {% for item in order.items %}
+            <li class="border rounded-lg px-4 py-2 bg-gray-50">
+              <p>
+                <span class="font-semibold">Product:</span> {{ item.product_name
+                }}
+              </p>
+              <p>
+                <span class="font-semibold">Quantity:</span> {{ item.quantity }}
+              </p>
+              <p>
+                <span class="font-semibold">Payment Method:</span> {{
+                order.payment_method }}
+              </p>
+              <p>
+                <span class="font-semibold">Total:</span> PKR {{
+                item.total_price }}
+              </p>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ product.name }}</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/main.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="{{ product.meta_description or product.description[:160] | striptags }}"
+    />
+    <meta
+      name="keywords"
+      content="{{ product.name }}, veterinary products, pet care, {{ product.animal_type }}, {{ product.form_type }}"
+    />
+    <meta
+      name="robots"
+      content="{% if not product.in_stock %}noindex, follow{% else %}index, follow{% endif %}"
+    />
+    <link rel="canonical" href="{{ request.url }}" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="product" />
+    <meta property="og:title" content="{{ product.name }}" />
+    <meta
+      property="og:description"
+      content="{{ product.meta_description or product.description[:160] | striptags }}"
+    />
+    <meta
+      property="og:image"
+      content="{{ product.images[0].image_url if product.images else url_for('static', filename='img/default-product.png', _external=True) }}"
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:site_name" content="Dr. Fassih Ul Abbas | Store" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ product.name }}" />
+    <meta
+      name="twitter:description"
+      content="{{ product.meta_description or product.description[:160] | striptags }}"
+    />
+    <meta
+      name="twitter:image"
+      content="{{ product.images[0].image_url if product.images else url_for('static', filename='img/default-product.png', _external=True) }}"
+    />
+  </head>
+  {% include 'navbar.html' %} {%include 'alert.html' %}
+  <body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Product Images -->
+        <div class="flex flex-col items-center">
+          <!-- Main Viewer -->
+          <div
+            class="w-full max-w-md mb-4 h-[500px] relative overflow-hidden rounded-lg shadow-lg border"
+          >
+            <img
+              id="main-product-image"
+              src="{{ product.images[0].image_url if product.images else 'https://picsum.photos/1920/1080' }}"
+              alt="{{ product.name }}"
+              class="absolute top-0 left-0 w-full h-full object-cover transition-all duration-200"
+            />
+          </div>
+
+          <!-- Thumbnails -->
+          <div class="flex gap-2">
+            {% for image in product.images %}
+            <img
+              src="{{ image.image_url }}"
+              alt="Thumbnail"
+              class="thumbnail w-20 h-20 object-cover border rounded cursor-pointer hover:border-blue-500 transition-all"
+              onclick="document.getElementById('main-product-image').src='{{ image.image_url }}'"
+            />
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="space-y-6">
+          <!-- Title & Stock -->
+          <div class="flex items-start justify-between">
+            <h1 class="text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+            {% if product.in_stock %}
+            <span class="text-green-500 font-semibold">In Stock</span>
+            {% else %}
+            <span class="text-red-500 font-semibold">Out of Stock</span>
+            {% endif %}
+          </div>
+
+          <!-- Price -->
+          <div class="text-2xl font-bold text-gray-900">
+            PKR
+            <span id="product-price"
+              >{{ '{:,.0f}'.format(product.sale_price) }}</span
+            >
+          </div>
+
+          <!-- Description -->
+          <div class="space-y-4 mt-4">
+            <h3 class="text-lg font-semibold text-gray-900">Description</h3>
+            <p class="text-gray-700 leading-relaxed">
+              {{ product.description or "No description available." }}
+            </p>
+          </div>
+
+          <!-- Shipping -->
+          <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span class="material-symbols-outlined">
+              delivery_truck_speed
+            </span>
+            <span>Shipping Not Included</span>
+          </div>
+
+          <!-- Product Options -->
+          <div class="space-y-4">
+            {% set variant_groups = {} %} {% for variant in product.variants %}
+            {% set _ = variant_groups.setdefault(variant.variant_name,
+            []).append(variant) %} {% endfor %} {% for variant_name, options in
+            variant_groups.items() %}
+            <div class="flex items-center justify-between">
+              <label class="text-gray-700 font-medium"
+                >{{ variant_name }}</label
+              >
+              <select
+                class="border border-gray-300 rounded px-3 py-2 bg-white min-w-32"
+                name="{{ variant_name }}"
+                data-variant="{{ variant_name }}"
+              >
+                {% for option in options %}
+                <option
+                  value="{{ option.variant_value }}"
+                  data-price="{{ option.price }}"
+                >
+                  {{ option.variant_value }} — PKR {{
+                  '{:,.0f}'.format(option.price) }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endfor %}
+
+            <!-- Quantity -->
+            <div class="flex items-center justify-between">
+              <label class="text-gray-700 font-medium">Quantity</label>
+              <div class="flex items-center border border-gray-300 rounded">
+                <button
+                  type="button"
+                  class="px-3 py-2 hover:bg-gray-100 transition-colors"
+                  onclick="decreaseQuantity()"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  id="quantity"
+                  value="1"
+                  min="1"
+                  max="{{ product.quantity }}"
+                  class="w-16 text-center border-0 outline-none"
+                />
+                <button
+                  type="button"
+                  class="px-3 py-2 hover:bg-gray-100 transition-colors"
+                  onclick="increaseQuantity()"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-3">
+            <form
+              id="add-to-cart-form"
+              method="POST"
+              action="{{ url_for('store.add_to_cart') }}"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input type="hidden" name="slug" id="cart-slug" />
+              <input type="hidden" name="quantity" id="cart-quantity" />
+              <input type="hidden" name="variants" id="cart-variants" />
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:cursor-pointer hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                {%
+                if
+                not
+                product.in_stock
+                %}disabled{%
+                endif
+                %}
+              >
+                <span class="material-symbols-outlined">add_shopping_cart</span>
+                {% if product.in_stock %}Add To Cart{% else %}Out of Stock{%
+                endif %}
+              </button>
+            </form>
+
+            <form
+              id="buy-now-form"
+              method="POST"
+              action="{{ url_for('store.buy_now') }}"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input type="hidden" name="slug" id="buy-now-slug" />
+              <input type="hidden" name="quantity" id="buy-now-quantity" />
+              <input type="hidden" name="variants" id="buy-now-variants" />
+              <button
+                type="submit"
+                class="w-full bg-black text-white py-3 px-6 rounded-lg font-medium hover:cursor-pointer hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                {%
+                if
+                not
+                product.in_stock
+                %}disabled{%
+                endif
+                %}
+              >
+                <span class="material-symbols-outlined"> attach_money </span>
+                {% if product.in_stock %}Buy now{% else %}Out of Stock{% endif
+                %}
+              </button>
+            </form>
+          </div>
+
+          <!-- Additional Description -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+              Additional Information
+            </h3>
+            <p class="text-gray-700 leading-relaxed">
+              {% if product.animal_type %}
+              <strong>Animal Type:</strong> {{ product.animal_type.title() }}<br />
+              {% endif %} {% if product.form_type %}
+              <strong>Form:</strong> {{ product.form_type.title() }}<br />
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const basePrice = parseFloat("{{ product.sale_price }}");
+      const priceSpan = document.getElementById("product-price");
+      const quantityInput = document.getElementById("quantity");
+      const maxQuantity = parseInt(quantityInput.max);
+
+      function getVariantAddons() {
+        let total = 0;
+        document.querySelectorAll("select[data-variant]").forEach((select) => {
+          const option = select.options[select.selectedIndex];
+          const addon = parseFloat(option.dataset.price || 0);
+          total += addon;
+        });
+        return total;
+      }
+
+      function updatePrice() {
+        const quantity = parseInt(quantityInput.value) || 1;
+        const total =
+          (basePrice + getVariantAddons()) * Math.min(quantity, maxQuantity);
+        priceSpan.textContent = total.toLocaleString();
+      }
+      function increaseQuantity() {
+        let current = parseInt(quantityInput.value);
+        if (current < maxQuantity) {
+          quantityInput.value = current + 1;
+          updatePrice();
+        }
+      }
+
+      function decreaseQuantity() {
+        let current = parseInt(quantityInput.value);
+        if (current > 1) {
+          quantityInput.value = current - 1;
+          updatePrice();
+        }
+      }
+
+      quantityInput.addEventListener("input", () => {
+        let val = parseInt(quantityInput.value);
+        if (isNaN(val) || val < 1) {
+          quantityInput.value = 1;
+        } else if (val > maxQuantity) {
+          quantityInput.value = maxQuantity;
+        }
+        updatePrice();
+      });
+
+      document.querySelectorAll("select[data-variant]").forEach((select) => {
+        select.addEventListener("change", updatePrice);
+      });
+
+      window.addEventListener("DOMContentLoaded", () => {
+        updatePrice();
+        document.querySelectorAll(".thumbnail").forEach((thumb) => {
+          thumb.addEventListener("click", () => {
+            document.getElementById("main-product-image").src = thumb.src;
+          });
+        });
+      });
+
+      // Handle both forms
+      function updateFormData() {
+        const slug = "{{ product.slug }}";
+        const quantity = document.getElementById("quantity").value;
+        const variants = {};
+
+        document.querySelectorAll("select[data-variant]").forEach((select) => {
+          variants[select.getAttribute("data-variant")] = select.value;
+        });
+
+        // Update cart form
+        document.getElementById("cart-slug").value = slug;
+        document.getElementById("cart-quantity").value = quantity;
+        document.getElementById("cart-variants").value =
+          JSON.stringify(variants);
+
+        // Update buy now form
+        document.getElementById("buy-now-slug").value = slug;
+        document.getElementById("buy-now-quantity").value = quantity;
+        document.getElementById("buy-now-variants").value =
+          JSON.stringify(variants);
+      }
+
+      document
+        .getElementById("buy-now-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          updateFormData();
+          this.submit();
+        });
+
+      document
+        .getElementById("add-to-cart-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          updateFormData();
+          this.submit();
+        });
+    </script>
+  </body>
+</html>

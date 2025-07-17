@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout - Vet Insights</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/main.css')}}"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="bg-gray-50">
+    {% include 'alert.html' %}
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
+        <div class="text-sm text-gray-600 font-bold">
+          <span
+            >{% if source == "buy-now" %} Buy Now {% else %} Cart {% endif
+            %}</span
+          >
+          <i class="fas fa-chevron-right mx-2"></i>
+          <span class="font-semibold">Checkout</span>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('store.process_checkout') }}">
+        {{ form.csrf_token }} {{ form.product_data(value=product_data_json if
+        product_data_json else '') }}
+
+        <input type="hidden" name="source" value="{{ source }}" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Left Column - Shipping & Payment -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Delivery Area Notice -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                <div>
+                  <h3 class="font-semibold text-blue-900">Delivery Area</h3>
+                  <p class="text-blue-800 text-sm">
+                    We currently deliver only within Lahore city limits
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+              <h2 class="text-xl font-semibold mb-4">Shipping Information</h2>
+
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    {{ form.first_name.label(class="block text-sm font-medium
+                    text-gray-700 mb-1") }} {{ form.first_name(class="w-full
+                    px-3 py-2 border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    placeholder="John") }} {% if form.first_name.errors %}
+                    <p class="text-red-500 text-sm mt-1">
+                      {{ form.first_name.errors[0] }}
+                    </p>
+                    {% endif %}
+                  </div>
+                  <div>
+                    {{ form.last_name.label(class="block text-sm font-medium
+                    text-gray-700 mb-1") }} {{ form.last_name(class="w-full px-3
+                    py-2 border border-gray-300 rounded-md focus:outline-none
+                    focus:ring-2 focus:ring-blue-500", placeholder="Doe") }} {%
+                    if form.last_name.errors %}
+                    <p class="text-red-500 text-sm mt-1">
+                      {{ form.last_name.errors[0] }}
+                    </p>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div>
+                  {{ form.phone.label(class="block text-sm font-medium
+                  text-gray-700 mb-1") }} {{ form.phone(class="w-full px-3 py-2
+                  border border-gray-300 rounded-md focus:outline-none
+                  focus:ring-2 focus:ring-blue-500",
+                  placeholder="+923001234567") }} {% if form.phone.errors %}
+                  <p class="text-red-500 text-sm mt-1">
+                    {{ form.phone.errors[0] }}
+                  </p>
+                  {% endif %}
+                </div>
+
+                <div>
+                  {{ form.email.label(class="block text-sm font-medium
+                  text-gray-700 mb-1") }} {{ form.email(class="w-full px-3 py-2
+                  border border-gray-300 rounded-md focus:outline-none
+                  focus:ring-2 focus:ring-blue-500",
+                  placeholder="john.doe@email.com") }} {% if form.email.errors
+                  %}
+                  <p class="text-red-500 text-sm mt-1">
+                    {{ form.email.errors[0] }}
+                  </p>
+                  {% endif %}
+                </div>
+
+                <div>
+                  {{ form.street_address.label(class="block text-sm font-medium
+                  text-gray-700 mb-1") }} {{
+                  form.street_address(placeholder="House #123, Street Name",
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md
+                  focus:outline-none focus:ring-2 focus:ring-blue-500") }} {% if
+                  form.street_address.errors %}
+                  <p class="text-red-500 text-sm mt-1">
+                    {{ form.street_address.errors[0] }}
+                  </p>
+                  {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    {{ form.area.label(class="block text-sm font-medium
+                    text-gray-700 mb-1") }} {{ form.area(class="w-full px-3 py-2
+                    border border-gray-300 rounded-md focus:outline-none
+                    focus:ring-2 focus:ring-blue-500", id="area-select") }} {%
+                    if form.area.errors %}
+                    <p class="text-red-500 text-sm mt-1">
+                      {{ form.area.errors[0] }}
+                    </p>
+                    {% endif %}
+                  </div>
+                  <div>
+                    {{ form.sub_area.label(class="block text-sm font-medium
+                    text-gray-700 mb-1") }} {{ form.sub_area(class="w-full px-3
+                    py-2 border border-gray-300 rounded-md focus:outline-none
+                    focus:ring-2 focus:ring-blue-500", id="subarea-select",
+                    disabled=true) }} {% if form.sub_area.errors %}
+                    <p class="text-red-500 text-sm mt-1">
+                      {{ form.sub_area.errors[0] }}
+                    </p>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div>
+                  {{ form.additional_notes.label(class="block text-sm
+                  font-medium text-gray-700 mb-1") }} {{ form.additional_notes(
+                  placeholder= "Landmarks, special instructions etc."
+                  ,class="w-full px-3 py-2 border border-gray-300 rounded-md
+                  focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  rows="3") }} {% if form.additional_notes.errors %}
+                  <p class="text-red-500 text-sm mt-1">
+                    {{ form.additional_notes.errors[0] }}
+                  </p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            {% for value, label in form.payment_method.choices %}
+            <div class="flex items-center mb-2">
+              <input type="radio" id="payment_{{ value }}" name="{{
+              form.payment_method.name }}" value="{{ value }}" class="mr-3" {%
+              if form.payment_method.data == value %}checked{% endif %} />
+              <label for="payment_{{ value }}" class="flex items-center">
+                {% if value == "cod" %}
+                <i class="fas fa-money-bill-wave text-green-600 mr-2"></i>
+                <span class="font-medium">{{ label }}</span>
+                {% else %}
+                <span class="font-medium">{{ label }}</span>
+                {% endif %}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Right Column - Order Summary -->
+          <div class="lg:col-span-1">
+            <div class="bg-white p-6 rounded-lg shadow-sm sticky top-8">
+              <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+
+              <!-- Cart Items -->
+              <div class="space-y-4 mb-6">
+                {% if cart_items %} {% for item in cart_items %}
+                <div class="flex justify-between items-start">
+                  <div class="flex">
+                    <img
+                      src="{{ item.product.images[0].image_url if item.product.images else 'https://picsum.photos/500/500' }}"
+                      alt="{{ item.product.name }}"
+                      class="w-16 h-16 object-cover rounded-md mr-3"
+                    />
+                    <div>
+                      <h3 class="font-medium text-gray-900">
+                        {{ item.product.name }}
+                      </h3>
+                      {% if item.variants %}
+                      <p class="text-sm text-gray-600">
+                        {% for variant_name, variant_value in
+                        item.variants.items() %} {{ variant_value }}{% if not
+                        loop.last %}, {% endif %} {% endfor %}
+                      </p>
+                      {% endif %}
+                      <p class="text-sm text-gray-600">
+                        Qty: {{ item.quantity }}
+                      </p>
+                    </div>
+                  </div>
+                  <span class="font-medium"
+                    >PKR {{ '{:,.0f}'.format(item.total_price) }}</span
+                  >
+                </div>
+                {% endfor %} {% else %}
+                <!-- Single Product (Buy Now) -->
+                <div class="flex justify-between items-start">
+                  <div class="flex">
+                    <img
+                      src="{{ product.images[0].image_url if product.images else 'https://picsum.photos/500/500' }}"
+                      alt="{{ product.name }}"
+                      class="w-16 h-16 object-cover rounded-md mr-3"
+                    />
+                    <div>
+                      <h3 class="font-medium text-gray-900">
+                        {{ product.name }}
+                      </h3>
+                      {% if selected_variants %}
+                      <p class="text-sm text-gray-600">
+                        {% for variant_name, variant_value in
+                        selected_variants.items() %} {{ variant_value }}{% if
+                        not loop.last %}, {% endif %} {% endfor %}
+                      </p>
+                      {% endif %}
+                      <p class="text-sm text-gray-600">Qty: {{ quantity }}</p>
+                    </div>
+                  </div>
+                  <span class="font-medium"
+                    >PKR {{ '{:,.0f}'.format(total_price) }}</span
+                  >
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Order Totals -->
+              <div class="border-t pt-4 space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Subtotal</span>
+                  <span>
+                    PKR {{ '{:,.0f}'.format(total_price if total_price else 0)
+                    }}
+                  </span>
+                </div>
+
+                <div
+                  class="flex justify-between font-semibold text-lg pt-2 border-t"
+                >
+                  <span>Total</span>
+                  <span>
+                    PKR {{ '{:,.0f}'.format((total_price if total_price else 0))
+                    }}
+                  </span>
+                </div>
+
+                <!-- Delivery Fee Notice -->
+                <div class="text-right">
+                  <span class="text-sm text-gray-500 italic"
+                    >+ delivery fee</span
+                  >
+                </div>
+              </div>
+
+              <!-- Place Order Button -->
+              <button
+                type="submit"
+                name="{{ form.submit.name }}"
+                value="{{ form.submit.data or form.submit.label.text }}"
+                class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors mt-6"
+              >
+                <i class="fas fa-shopping-cart mr-2"></i>
+                {{ form.submit.label.text }}
+              </button>
+
+              <!-- Security Notice -->
+              <div class="text-center mt-4">
+                <p class="text-xs text-gray-500">
+                  <i class="fas fa-shield-alt mr-1"></i>
+                  Your information is secure and encrypted
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const areaSelect = document.getElementById("area-select");
+        const subareaSelect = document.getElementById("subarea-select");
+
+        fetch("{{ url_for('static', filename='areas.json') }}")
+          .then((response) => response.json())
+          .then((lahoreAreas) => {
+            areaSelect.innerHTML = '<option value="">Select Area</option>';
+
+            Object.entries(lahoreAreas.areas).forEach(([key, area]) => {
+              const option = document.createElement("option");
+              option.value = key;
+              option.textContent = area.name;
+              areaSelect.appendChild(option);
+            });
+
+            areaSelect.addEventListener("change", function () {
+              const selectedAreaKey = this.value;
+              subareaSelect.innerHTML =
+                '<option value="">Select Sub Area</option>';
+
+              if (selectedAreaKey) {
+                const selectedArea = lahoreAreas.areas[selectedAreaKey];
+                subareaSelect.disabled = false;
+
+                selectedArea.sub_areas.forEach((subArea) => {
+                  const option = document.createElement("option");
+                  option.value = subArea;
+                  option.textContent = subArea;
+                  subareaSelect.appendChild(option);
+                });
+              } else {
+                subareaSelect.disabled = true;
+              }
+            });
+          })
+          .catch((error) => {
+            console.error("Error loading areas.json:", error);
+          });
+      });
+    </script>
+  </body>
+</html>

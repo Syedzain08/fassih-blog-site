@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
 
     <!-- SEO Meta Tags -->
     <title>{{ article.title }} - Dr. Fassih Ul Abbas | Medical Blog</title>
@@ -119,7 +124,7 @@
     />
   </head>
 
-  {% include 'navbar.html' %}
+  {% include 'navbar.html' %} {% include 'alert.html' %}
 
   <body class="bg-[#f9f9f6]">
     <!-- Back Button -->

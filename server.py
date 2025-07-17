@@ -1,9 +1,18 @@
 # --- Standard Library Imports --- #
 from io import BytesIO
-from os import getenv
+from os import getenv, path
 
 # --- Flask Core Imports --- #
-from flask import Flask, render_template, request, jsonify, Blueprint
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    Blueprint,
+    redirect,
+    url_for,
+    send_from_directory,
+)
 
 # --- Flask Extensions --- #
 from flask_login import LoginManager, login_required
@@ -19,13 +28,15 @@ from PIL import Image
 from sqlalchemy import or_
 
 # --- Local Application Imports --- #
-from db_models import db, Admins, Articles
+from db_models import db, Admins, Articles, Products
 from utils import *
 
 # --- Blueprint Imports --- #
 from blueprints.admin.routes import admin_bp
 from blueprints.blog.routes import blog_bp
 from blueprints.auth.routes import auth_bp
+from blueprints.store.routes import store_bp
+from blueprints.sitemap.sitemaps import sitemap_bp
 
 
 # --- Enviroment Setup --- #
@@ -62,6 +73,8 @@ login_manager.init_app(app)
 app.register_blueprint(admin_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(store_bp)
+app.register_blueprint(sitemap_bp)
 
 
 # --- Cloudinary Config --- #
@@ -86,48 +99,61 @@ def index():
         .order_by(Articles.created_at.desc())
         .all()
     )
+
+    products = (
+        (Products.query.filter(Products.in_stock != False))
+        .order_by(Products.created_at.desc())
+        .all()
+    )
     for article in articles:
         if not article.description:
             article.description = extract_first_sentence(article.content)
 
-    return render_template("index.html", articles=articles)
+    return render_template("index.html", articles=articles, products=products)
 
 
 @app.route("/search")
 def search():
     query = request.args.get("q", "").strip()
+    tab = request.args.get("tab", "articles")
     page = request.args.get("page", 1, type=int)
-    per_page = 12
+    product_page = request.args.get("product_page", 1, type=int)
 
-    if not query:
-
-        articles = []
-        pagination = None
-        total_results = 0
-    else:
-
-        search_filter = or_(
+    articles_query = Articles.query.filter(
+        Articles.status == "public",
+        or_(
             Articles.title.ilike(f"%{query}%"),
             Articles.description.ilike(f"%{query}%"),
             Articles.content.ilike(f"%{query}%"),
             Articles.tags.ilike(f"%{query}%"),
-        )
+            Articles.slug.ilike(f"%{query}%"),
+        ),
+    )
 
-        pagination = (
-            Articles.query.filter(Articles.status == "public", search_filter)
-            .order_by(Articles.created_at.desc())
-            .paginate(page=page, per_page=per_page, error_out=False)
-        )
+    article_pagination = articles_query.paginate(page=page, per_page=12)
 
-        articles = pagination.items
-        total_results = pagination.total
+    products_query = Products.query.filter(
+        or_(
+            Products.name.ilike(f"%{query}%"),
+            Products.description.ilike(f"%{query}%"),
+            Products.tags.ilike(f"%{query}%"),
+            Products.slug.ilike(f"%{query}%"),
+            Products.animal_type.ilike(f"%{query}%"),
+            Products.form_type.ilike(f"%{query}%"),
+        )
+    )
+
+    product_pagination = products_query.paginate(page=product_page, per_page=12)
 
     return render_template(
         "search_results.html",
-        articles=articles,
         query=query,
-        pagination=pagination,
-        total_results=total_results,
+        tab=tab,
+        articles=article_pagination.items,
+        article_pagination=article_pagination,
+        products=product_pagination.items,
+        product_pagination=product_pagination,
+        active_tab=tab,
     )
 
 
@@ -197,6 +223,29 @@ def upload_video():
     except Exception as e:
         app.logger.error(f"Video upload error: {str(e)}")
         return jsonify({"success": False, "error": f"Upload failed: {str(e)}"}), 500
+
+
+# --- Redirects --- #
+@app.route("/blog")
+@app.route("/posts")
+def blog_redirect():
+    """Redirect common blog URLs to the main articles page"""
+    return redirect(url_for("blog.all_articles"), code=301)
+
+
+# --- Web Utiliyy --- #
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        path.join(app.root_path, "static", "img"),
+        "favicon.ico",
+        mimetype="image/vnd.microsoft.icon",
+    )
+
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory("static", "robots.txt")
 
 
 # --- Error Handlers --- #

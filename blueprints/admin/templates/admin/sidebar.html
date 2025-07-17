@@ -36,6 +36,20 @@
             <i class="fas fa-edit mr-3"></i>
             <span>Manage Articles</span>
           </a>
+          <a
+            href="{{ url_for('admin.manage_products') }}"
+            class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors duration-200"
+          >
+            <span class="material-symbols-outlined mr-3"> pet_supplies </span>
+            <span>Manage Products</span>
+          </a>
+          <a
+            href="{{ url_for('admin.manage_orders') }}"
+            class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors duration-200"
+          >
+            <span class="material-symbols-outlined mr-3"> orders </span>
+            <span>Manage Orders</span>
+          </a>
 
           {% if current_user.is_superadmin %}
           <a

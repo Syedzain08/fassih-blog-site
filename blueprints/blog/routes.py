@@ -109,17 +109,10 @@ def view_article(slug):
         )
 
         return render_template(
-            "blog/view_post.html", article=article, related_posts=related_posts
+            "blog/view_article.html", article=article, related_posts=related_posts
         )
 
     except Exception as e:
         db.session.rollback()
         flash(f"Error loading post: {e}", "danger")
         return redirect(url_for("index"))
-
-
-@blog_bp.route("/blog")
-@blog_bp.route("/posts")
-def blog_redirect():
-    """Redirect common blog URLs to the main articles page"""
-    return redirect(url_for("blog.all_articles"), code=301)

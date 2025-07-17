@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products | Vet insights</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Explore veterinary products carefully selected by Dr. Fassih Ul Abbas. Shop pet medicines, treatments, and health supplements.">
+    <meta name="keywords" content="veterinary products, pet medicine, Dr. Fassih Ul Abbas, dog care, cat health, farm animal supplements, vet store Lahore">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.url }}" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="All Products | Dr. Fassih Ul Abbas" />
+    <meta property="og:description" content="Carefully curated veterinary products and pet care items by Dr. Fassih Ul Abbas. Trusted and tested for your animals.">
+    <meta property="og:image" content="{{ url_for('static', filename='img/store-cover.jpg', _external=True) }}" />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:site_name" content="Dr. Fassih Ul Abbas | Vet Store" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="All Veterinary Products – Dr. Fassih Ul Abbas" />
+    <meta name="twitter:description" content="Shop trusted veterinary products and treatments recommended by Dr. Fassih Ul Abbas.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='img/hero-portrait.png', _external=True) }}"/>
+
+  </head>
+  <body class="bg-gray-50">
+    {% include 'navbar.html' %} {% include 'alert.html' %}
+    <header class="bg-white border-b border-gray-200 py-8">
+      <div class="max-w-6xl mx-auto px-8">
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-4">All Products</h1>
+        <p class="text-gray-600 text-center max-w-xl mx-auto mb-6">
+          Browse our selection of veterinary products.
+        </p>
+
+        <!-- Filter Controls -->
+        <form method="GET" action="" class="flex flex-wrap justify-center gap-4">
+          <!-- Stock Filter -->
+          <select name="stock" onchange="this.form.submit()" class="px-4 py-2 rounded border border-gray-300">
+            <option value="all" {% if stock == 'all' %}selected{% endif %}>All Stock</option>
+            <option value="in_stock" {% if stock == 'in_stock' %}selected{% endif %}>In Stock</option>
+            <option value="out_of_stock" {% if stock == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+          </select>
+
+          <!-- Sort Filter -->
+          <select name="sort" onchange="this.form.submit()" class="px-4 py-2 rounded border border-gray-300">
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+            <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+            <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price (Low to High)</option>
+            <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price (High to Low)</option>
+            <option value="quantity_low" {% if sort == 'quantity_low' %}selected{% endif %}>Quantity (Low to High)</option>
+            <option value="quantity_high" {% if sort == 'quantity_high' %}selected{% endif %}>Quantity (High to Low)</option>
+          </select>
+
+          <!-- Category Filter -->
+          <select name="category" onchange="this.form.submit()" class="px-4 py-2 rounded border border-gray-300">
+            <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </header>
+
+    <!-- Products Grid -->
+    <main class="max-w-6xl mx-auto px-8 py-16">
+      {% if products %}
+      <section class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {% for product in products %}
+          <div class="bg-white shadow-md rounded-2xl overflow-hidden border border-gray-200 hover:scale-105 hover:shadow-2xl transition duration-300">
+            <a href="{{ url_for('store.view_product', slug=product.slug) }}" class="block">
+              <div class="relative">
+                <img
+                  src="{{ product.images[0].image_url if product.images else 'https://picsum.photos/1920/1080?random={{ product.id }}' }}"
+                  alt="{{ product.name }} image"
+                  class="w-full h-48 object-cover"
+                  loading="lazy"
+                />
+                {% if product.animal_type %}
+                 <span class="absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded shadow">
+                    {{ product.animal_type }}
+                </span>
+                {% endif %}
+              </div>
+              <div class="p-4 space-y-2">
+                <h2 class="text-lg font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors">
+                  {{ product.name }}
+                </h2>
+                <p class="text-sm text-gray-600 line-clamp-2">
+                  {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                  </p>
+                <div class="flex justify-between items-center text-sm text-gray-500">
+                  <span>{{ product.category.name if product.category else 'Uncategorized' }}</span>
+                  {% if product.form_type %}
+                  <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                    {{ product.form_type }}
+                  </span>
+                  {% endif %}
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-blue-600 font-bold text-lg">Rs. {{ product.sale_price }}</span>
+                  <span class="text-xs font-medium text-{{ 'green' if product.in_stock else 'red' }}-600">
+                    {{ 'In Stock' if product.in_stock else 'Out of Stock' }}
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+
+        {% endfor %}
+      </section>
+        <!-- Pagination -->
+      {% if pagination and pagination.pages > 1 %}
+      <nav class="flex justify-center mt-5" aria-label="Article pagination">
+        <div class="flex items-center space-x-2">
+          
+         
+          {% if pagination.has_prev %}
+          <a
+            href="{{ url_for('store.store_page', page=pagination.prev_num, sort=sort, stock=stock, category=selected_category) }}"
+            class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1"
+            aria-label="Go to previous page"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+          </a>
+          {% endif %}
+
+         
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              {% if page_num != pagination.page %}
+                <a
+                  href="{{ url_for('store.store_page', page=page_num, sort=sort, stock=stock, category=selected_category) }}"
+                  class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  aria-label="Go to page {{ page_num }}"
+                >
+                  {{ page_num }}
+                </a>
+              {% else %}
+                <span
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold"
+                  aria-current="page"
+                  aria-label="Current page {{ page_num }}"
+                >
+                  {{ page_num }}
+                </span>
+              {% endif %}
+            {% else %}
+              <span class="px-2 py-2 text-gray-400" aria-hidden="true">…</span>
+            {% endif %}
+          {% endfor %}
+
+        
+          {% if pagination.has_next %}
+          <a
+            href="{{ url_for('store.store_page', page=pagination.next_num, sort=sort, stock=stock, category=selected_category) }}"
+            class="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1"
+            aria-label="Go to next page"
+          >
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+          {% endif %}
+        </div>
+      </nav>
+      {% endif %}
+
+
+      {% else %}
+      <p class="text-center text-gray-600">No products found for your selected filters.</p>
+      {% endif %}
+    </main>
+  </body>
+</html>

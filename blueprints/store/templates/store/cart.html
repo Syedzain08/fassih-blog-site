@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>Shopping Cart - Vet Insights</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/main.css')}}"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body class="bg-gray-50">
+    {% include 'alert.html' %}
+    <div class="max-w-4xl mx-auto px-4 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+        <div class="text-sm text-gray-600">
+          <span class="font-semibold">Cart</span>
+          <i class="fas fa-chevron-right mx-2"></i>
+          <span>Review Items</span>
+        </div>
+      </div>
+
+      {% if cart_items %}
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div
+          class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+        >
+          <h2 class="text-lg font-semibold text-gray-900">Cart Items</h2>
+          <button
+            type="button"
+            id="clear-cart-btn"
+            class="text-red-600 hover:text-red-800 text-sm"
+          >
+            <i class="fas fa-trash mr-1"></i>Clear Cart
+          </button>
+        </div>
+
+        <div class="divide-y divide-gray-200">
+          {% for item in cart_items %}
+          <div
+            class="p-4 md:p-6 cart-item"
+            data-slug="{{ item.product.slug }}"
+            data-variants="{{ item.variants | tojson}}"
+            data-item-index="{{ loop.index0 }}"
+          >
+            <!-- Mobile Layout -->
+            <div class="block md:hidden">
+              <div class="flex space-x-3">
+                <div class="flex-shrink-0">
+                  <img
+                    src="{{ item.product.images[0].image_url if item.product.images else 'https://picsum.photos/500/00' }}"
+                    alt="{{ item.product.name }}"
+                    class="w-16 h-16 object-cover rounded-md"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-base font-medium text-gray-900">
+                    {{ item.product.name }}
+                  </h3>
+                  {% if item.variants %}
+                  <p class="text-sm text-gray-600 mt-1">
+                    {% for variant_name, variant_value in item.variants.items()
+                    %} {{ variant_value }}{% if not loop.last %}, {% endif %} {%
+                    endfor %}
+                  </p>
+                  {% endif %}
+                  <p class="text-sm text-gray-500 mt-1">
+                    PKR {{ '{:,.0f}'.format(item.unit_price) }} each
+                  </p>
+
+                  <div class="flex items-center justify-between mt-3">
+                    <div class="text-sm text-gray-600">
+                      Quantity: {{ item.quantity }}
+                    </div>
+                    <div class="text-right">
+                      <div
+                        class="text-base font-medium text-gray-900 item-total"
+                      >
+                        PKR {{ '{:,.0f}'.format(item.total_price) }}
+                      </div>
+                      <button
+                        type="button"
+                        class="remove-item text-red-600 hover:text-red-800 text-xs mt-1"
+                      >
+                        <i class="fas fa-trash mr-1"></i>Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex items-center space-x-4">
+              <!-- Product Image -->
+              <div class="flex-shrink-0">
+                <img
+                  src="{{ item.product.images[0].image_url if item.product.images else 'https://picsum.photos/500/500' }}"
+                  alt="{{ item.product.name }}"
+                  class="w-20 h-20 object-cover rounded-md"
+                />
+              </div>
+
+              <!-- Product Details -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-medium text-gray-900 truncate">
+                  {{ item.product.name }}
+                </h3>
+                {% if item.variants %}
+                <p class="text-sm text-gray-600 mt-1">
+                  {% for variant_name, variant_value in item.variants.items() %}
+                  {{ variant_value }}{% if not loop.last %}, {% endif %} {%
+                  endfor %}
+                </p>
+                {% endif %}
+                <p class="text-sm text-gray-500 mt-1">
+                  PKR {{ '{:,.0f}'.format(item.unit_price) }} each
+                </p>
+                <p class="text-sm text-gray-600 mt-1">
+                  Quantity: {{ item.quantity }}
+                </p>
+              </div>
+
+              <!-- Price and Remove -->
+              <div class="text-right">
+                <div class="text-lg font-medium text-gray-900 item-total">
+                  PKR {{ '{:,.0f}'.format(item.total_price) }}
+                </div>
+                <button
+                  type="button"
+                  class="remove-item text-red-600 hover:text-red-800 text-sm mt-2"
+                >
+                  <i class="fas fa-trash mr-1"></i>Remove
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="bg-gray-50 px-4 md:px-6 py-4 border-t border-gray-200">
+          <div
+            class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0"
+          >
+            <div class="text-center sm:text-left">
+              <span class="text-lg font-medium text-gray-900">Total: </span>
+              <span class="text-2xl font-bold text-gray-900" id="cart-total"
+                >PKR {{ '{:,.0f}'.format(total) }}</span
+              >
+              <p class="text-sm text-gray-500 mt-1">
+                + delivery fee at checkout
+              </p>
+            </div>
+            <div
+              class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4"
+            >
+              <a
+                href="{{ url_for('store.store_page') }}"
+                class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+              </a>
+              <a
+                href="{{ url_for('store.cart_checkout') }}"
+                class="inline-flex items-center justify-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <!-- Empty Cart -->
+      <div class="bg-white rounded-lg shadow-sm p-12 text-center">
+        <i class="fas fa-shopping-cart text-gray-400 text-6xl mb-4"></i>
+        <h2 class="text-2xl font-medium text-gray-900 mb-2">
+          Your cart is empty
+        </h2>
+        <p class="text-gray-600 mb-6">
+          Add some items to your cart to get started
+        </p>
+        <a
+          href="{{ url_for('store.store_page') }}"
+          class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          <i class="fas fa-arrow-left mr-2"></i>Start Shopping
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        function getCSRFToken() {
+          const meta = document.querySelector('meta[name="csrf-token"]');
+          return meta ? meta.getAttribute("content") : "";
+        }
+
+        function showMessage(message, type = "success") {
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+            type === "success" ? "bg-green-500" : "bg-red-500"
+          }`;
+          messageDiv.textContent = message;
+          document.body.appendChild(messageDiv);
+
+          setTimeout(() => {
+            if (messageDiv.parentNode) {
+              document.body.removeChild(messageDiv);
+            }
+          }, 3000);
+        }
+
+        function removeItem(slug, variants) {
+          console.log("Removing item:", slug, variants);
+
+          const formData = new FormData();
+          formData.append("slug", slug);
+          formData.append("variants", JSON.stringify(variants));
+
+          const csrfToken = getCSRFToken();
+          if (csrfToken) {
+            formData.append("csrf_token", csrfToken);
+          }
+
+          fetch('{{ url_for("store.remove_from_cart") }}', {
+            method: "POST",
+            body: formData,
+            headers: {
+              "X-CSRFToken": csrfToken,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Response:", data);
+              if (data.success) {
+                const itemElement = document.querySelector(
+                  `[data-slug="${slug}"]`
+                );
+                if (itemElement) {
+                  const itemVariants =
+                    itemElement.getAttribute("data-variants");
+                  const itemVariantsParsed = JSON.parse(itemVariants);
+
+                  if (
+                    JSON.stringify(itemVariantsParsed) ===
+                    JSON.stringify(variants)
+                  ) {
+                    itemElement.remove();
+                  }
+                }
+
+                const cartTotal = document.getElementById("cart-total");
+                if (cartTotal) {
+                  cartTotal.textContent = `PKR ${data.cart_total.toLocaleString()}`;
+                }
+
+                if (document.querySelectorAll(".cart-item").length === 0) {
+                  location.reload();
+                }
+
+                showMessage("Item removed from cart!", "success");
+              } else {
+                showMessage(data.message || "Error removing item", "error");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showMessage("Error removing item. Please try again.", "error");
+            });
+        }
+
+        function showConfirmModal(message, onConfirm) {
+          const modal = document.createElement("div");
+          modal.className =
+            "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+          modal.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div class="p-6">
+                <div class="flex items-center mb-4">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-lg font-medium text-gray-900">Confirm Action</h3>
+                  </div>
+                </div>
+                <p class="text-gray-600 mb-6">${message}</p>
+                <div class="flex justify-end space-x-3">
+                  <button type="button" class="cancel-btn px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    Cancel
+                  </button>
+                  <button type="button" class="confirm-btn px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    Yes, Clear Cart
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          document.body.appendChild(modal);
+
+          const confirmBtn = modal.querySelector(".confirm-btn");
+          const cancelBtn = modal.querySelector(".cancel-btn");
+
+          confirmBtn.addEventListener("click", () => {
+            document.body.removeChild(modal);
+            onConfirm();
+          });
+
+          cancelBtn.addEventListener("click", () => {
+            document.body.removeChild(modal);
+          });
+
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+              document.body.removeChild(modal);
+            }
+          });
+        }
+
+        function clearCart() {
+          showConfirmModal(
+            "Are you sure you want to clear your cart? This action cannot be undone.",
+            () => {
+              const formData = new FormData();
+              const csrfToken = getCSRFToken();
+              if (csrfToken) {
+                formData.append("csrf_token", csrfToken);
+              }
+
+              fetch('{{ url_for("store.clear_cart") }}', {
+                method: "POST",
+                body: formData,
+                headers: {
+                  "X-CSRFToken": csrfToken,
+                },
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    location.reload();
+                  } else {
+                    showMessage(data.message || "Error clearing cart", "error");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  showMessage(
+                    "Error clearing cart. Please try again.",
+                    "error"
+                  );
+                });
+            }
+          );
+        }
+
+        document.querySelectorAll(".remove-item").forEach((button) => {
+          button.addEventListener("click", function (e) {
+            e.preventDefault();
+            const item = this.closest(".cart-item");
+            const slug = item.getAttribute("data-slug");
+            const variantsStr = item.getAttribute("data-variants");
+
+            console.log("Raw variants string:", variantsStr); // Debug log
+
+            let variants = {};
+            try {
+              variants = JSON.parse(variantsStr);
+            } catch (e) {
+              console.error("Error parsing variants:", e);
+              variants = {};
+            }
+
+            removeItem(slug, variants);
+          });
+        });
+
+        const clearCartBtn = document.getElementById("clear-cart-btn");
+        if (clearCartBtn) {
+          clearCartBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            clearCart();
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

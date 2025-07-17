@@ -1,0 +1,191 @@
+{% extends "admin/base.html" %}
+{% block title %}Manage Orders{% endblock %}
+{% block body %}
+
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4 w-full">
+  <div>
+    <h2 class="text-xl sm:text-2xl font-bold text-white">Manage Orders</h2>
+    <p class="text-gray-400 text-sm sm:text-base mt-1">Manage all customer orders</p>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6 w-full">
+  <div class="flex flex-col sm:flex-row gap-4 items-center w-full flex-wrap">
+    <label class="text-sm font-medium text-gray-300">Filter Orders</label>
+    <select id="order-status-filter" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+      <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+    </select>
+  </div>
+</div>
+
+<!-- Orders -->
+<div class="space-y-6 w-full">
+  {% for order in orders %}
+  <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full">
+    <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start flex-wrap">
+      <div class="min-w-0 flex-1">
+        <h3 class="text-white text-lg font-semibold">Order #{{ order.id }}</h3>
+        <p class="text-gray-400 text-sm">Placed on {{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+        <p class="text-gray-300 text-sm mt-1">
+          <strong>Customer:</strong> {{ order.first_name }} {{ order.last_name }} |
+          <strong>Phone:</strong> {{ order.phone }} |
+          <strong>Email:</strong> {{ order.email }}
+        </p>
+        <p class="text-gray-300 text-sm">
+          <strong>Address:</strong> {{ order.street_address }}, {{ order.area }}{% if order.sub_area %}, {{ order.sub_area }}{% endif %}
+        </p>
+        <p class="text-gray-400 text-sm mt-1"><strong>Payment:</strong> {{ order.payment_method }} | <strong>Total:</strong> PKR {{ order.total_amount }}</p>
+      </div>
+        <div class="flex flex-wrap gap-2 sm:items-center w-full sm:w-auto">
+        {% if order.status == 'pending' %}
+        <form method="POST" action="{{ url_for('admin.complete_order', order_id=order.id) }}" class="w-full sm:w-auto">
+            {{ complete_form.hidden_tag() }}
+            <input type="submit" value="Mark as Completed"
+                class="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">
+        </form>
+
+        <button
+            data-order-id="{{ order.id }}"
+            data-order-name="{{ order.first_name }} {{ order.last_name }}"
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm cancel-order-btn">
+            Cancel Order
+        </button>
+        {% else %}
+        <span class="px-4 py-2 rounded-lg text-sm {% if order.status == 'completed' %}text-green-400{% else %}text-red-400{% endif %}">
+            {{ order.status | capitalize }}
+        </span>
+        {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Order Items -->
+    <div class="mt-4 border-t border-gray-800 pt-4 space-y-2 text-sm text-gray-300">
+      {% for item in order.items %}
+      <div class="flex justify-between">
+        <span>{{ item.product_name }} x {{ item.quantity }}</span>
+        <span>PKR {{ item.total_price }}</span>
+      </div>
+      {% endfor %}
+      <p class="text-gray-200 font-semibold text-sm mt-3">Order Total: PKR {{ order.total_amount }}</p>
+
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center text-gray-400 mt-10">
+    <p>No {{ current_status }} orders found.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<div class="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <div class="text-sm text-gray-400">
+    Showing {{ pagination.per_page * (pagination.page - 1) + 1 }} to 
+    {{ pagination.per_page * pagination.page if pagination.page < pagination.pages else pagination.total }} 
+    of {{ pagination.total }} orders
+  </div>
+
+  <div class="flex items-center flex-wrap gap-2">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.manage_orders', page=pagination.prev_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 flex items-center">
+      <i class="fas fa-chevron-left mr-1"></i> Prev
+    </a>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if page_num %}
+        {% if page_num == pagination.page %}
+        <span class="px-3 py-2 bg-blue-600 text-white rounded-lg">{{ page_num }}</span>
+        {% else %}
+        <a href="{{ url_for('admin.manage_orders', page=page_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+      <span class="px-3 py-2 text-gray-500">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.manage_orders', page=pagination.next_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 flex items-center">
+      Next <i class="fas fa-chevron-right ml-1"></i>
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Cancel Modal -->
+<div id="cancel-order-modal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
+  <form method="POST" action="" id="cancel-order-form" class="bg-gray-900 rounded-lg border border-gray-800 w-full max-w-md mx-4">
+    {{ cancel_form.hidden_tag() }}
+    <div class="p-4 sm:p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg text-white font-semibold">Cancel Order</h3>
+        <button id="close-cancel-modal" type="button" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="text-gray-300 text-sm mb-3">
+        Are you sure you want to cancel order <strong id="cancel-order-id-label"></strong>?
+      </p>
+      <div class="mb-4">
+        {{ cancel_form.reason.label(class_="text-sm text-gray-300 block mb-1") }}
+        {{ cancel_form.reason(class_="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2") }}
+        {% for error in cancel_form.reason.errors %}
+        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button type="button" id="cancel-cancel-btn" class="text-gray-400 hover:text-white">Back</button>
+        {{ cancel_form.submit(class_="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg") }}
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const filterSelect = document.getElementById("order-status-filter");
+    filterSelect.addEventListener("change", () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("status", filterSelect.value);
+      url.searchParams.set("page", "1");
+      window.location.href = url.toString();
+    });
+
+    const cancelButtons = document.querySelectorAll(".cancel-order-btn");
+    const cancelModal = document.getElementById("cancel-order-modal");
+    const cancelForm = document.getElementById("cancel-order-form");
+    const cancelLabel = document.getElementById("cancel-order-id-label");
+    const closeBtn = document.getElementById("close-cancel-modal");
+    const backBtn = document.getElementById("cancel-cancel-btn");
+
+    cancelButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const orderId = btn.dataset.orderId;
+        const orderName = btn.dataset.orderName;
+        cancelLabel.textContent = `#${orderId} (${orderName})`;
+        cancelForm.action = `/admin/orders/${orderId}/cancel`;
+        cancelModal.classList.replace("hidden", "flex");
+      });
+    });
+
+    [closeBtn, backBtn].forEach(btn => {
+      btn.addEventListener("click", () => {
+        cancelModal.classList.replace("flex", "hidden");
+      });
+    });
+
+    cancelModal.addEventListener("click", (e) => {
+      if (e.target === cancelModal) {
+        cancelModal.classList.replace("flex", "hidden");
+      }
+    });
+  });
+</script>
+
+{% endblock %}

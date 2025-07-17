@@ -7,6 +7,10 @@ from re import search
 from slugify import slugify
 import string
 import secrets
+import requests
+from os import getenv
+from twilio.rest import Client
+from json import loads, dumps
 
 
 # --- Functions --- #
@@ -63,6 +67,11 @@ def check_username_criteria(username):
         return False
 
     return True
+
+
+def generate_throwaway_password(length=12):
+    characters = string.ascii_letters + string.digits
+    return "".join(secrets.choice(characters) for _ in range(length))
 
 
 # Article utility functions
@@ -129,6 +138,16 @@ def allowed_video_file(filename):
     )
 
 
-def generate_throwaway_password(length=12):
-    characters = string.ascii_letters + string.digits
-    return "".join(secrets.choice(characters) for _ in range(length))
+def dicts_equal(a, b):
+    return dumps(a, sort_keys=True) == dumps(b, sort_keys=True)
+
+
+# --- Site Map Utility --- #
+def ping_google():
+    try:
+        sitemap_url = "https://vet-insights.com/sitemap.xml"
+        ping_url = f"https://www.google.com/ping?sitemap={sitemap_url}"
+        requests.get(ping_url, timeout=5)
+    except requests.exceptions.RequestException:
+
+        pass

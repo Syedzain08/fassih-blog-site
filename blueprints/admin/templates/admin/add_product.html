@@ -1,0 +1,544 @@
+{% extends "admin/base.html" %} {% block title %}{% if edit_mode %}Edit{% else
+%}Add{% endif %} Product{% endblock %} {% block head %}
+<style>
+  .variant-item {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #1f2937;
+  }
+
+  .variant-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: #111827;
+    border-radius: 6px;
+  }
+
+  .image-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #374151;
+  }
+
+  .image-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 12px;
+    margin-bottom: 12px;
+  }
+
+  .remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .primary-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: #059669;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+</style>
+<meta name="robots" content="noindex, nofollow" />
+{% endblock %} {% block body %}
+<div class="container mx-auto px-4 py-12">
+  <div class="max-w-6xl mx-auto bg-gray-900 rounded-xl shadow-lg p-8">
+    <h1 class="text-3xl font-bold text-white mb-8">
+      {% if edit_mode %}Edit Product{% else %}Add New Product{% endif %}
+    </h1>
+
+    <form id="add-product-form" method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Left Column -->
+        <div>
+          <!-- Product Name -->
+          <div class="mb-6">
+            {{ form.name.label(class_="block text-white font-semibold text-xl
+            mb-3") }} {{ form.name(class_="w-full bg-gray-800 border
+            border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+            focus:ring-2 focus:ring-blue-600 transition-all") }}
+          </div>
+
+          <!-- Description -->
+          <div class="mb-6">
+            {{ form.description.label(class_="block text-white font-semibold
+            text-xl mb-3") }} {{ form.description(class_="w-full bg-gray-800
+            border border-gray-700 text-white rounded-lg px-4 py-2 h-32 resize-y
+            focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all")
+            }}
+          </div>
+
+          <!-- Category -->
+          {% if form.category_id.choices|length > 1 %}
+          <div class="mb-6">
+            {{ form.category_id.label(class_="block text-white font-semibold
+            text-xl mb-3") }} {{ form.category_id(class_="w-full bg-gray-800
+            border border-gray-700 text-white rounded-lg px-4 py-2
+            focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all")
+            }}
+          </div>
+          {% else %}
+          <p class="text-red-500 text-sm">
+            ⚠️ No categories available. Please add one first.
+          </p>
+          {% endif %}
+
+          <!-- Animal Type -->
+          <div class="mb-6">
+            {{ form.animal_type.label(class_="block text-white font-semibold
+            text-xl mb-3") }} {{ form.animal_type(class_="w-full bg-gray-800
+            border border-gray-700 text-white rounded-lg px-4 py-2
+            focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all",
+            id="animal-type-select") }}
+
+            <!-- Custom animal type input (hidden by default) -->
+            <div id="custom-animal-container" class="mt-3 hidden">
+              <label class="block text-white font-medium mb-2"
+                >Custom Animal Type:</label
+              >
+              <input
+                type="text"
+                id="custom-animal-input"
+                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                placeholder="Enter custom animal type"
+              />
+            </div>
+          </div>
+
+          <!-- Form Type -->
+          <div class="mb-6">
+            {{ form.form_type.label(class_="block text-white font-semibold
+            text-xl mb-3") }} {{ form.form_type(class_="w-full bg-gray-800
+            border border-gray-700 text-white rounded-lg px-4 py-2
+            focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all",
+            id="form-type-select") }}
+
+            <!-- Custom form type input (hidden by default) -->
+            <div id="custom-form-container" class="mt-3 hidden">
+              <label class="block text-white font-medium mb-2"
+                >Custom Form Type:</label
+              >
+              <input
+                type="text"
+                id="custom-form-input"
+                class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                placeholder="Enter custom form type"
+              />
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="mb-6">
+            {{ form.tags.label(class_="block text-white font-semibold text-xl
+            mb-3") }} {{ form.tags(class_="w-full bg-gray-800 border
+            border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+            focus:ring-2 focus:ring-blue-600 transition-all") }}
+            <p class="text-gray-400 text-sm mt-1">Separate tags with commas</p>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div>
+          <!-- Pricing -->
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              {{ form.purchase_price.label(class_="block text-white
+              font-semibold text-xl mb-3") }} {{
+              form.purchase_price(class_="w-full bg-gray-800 border
+              border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none
+              focus:ring-2 focus:ring-blue-600 transition-all", step="0.01") }}
+            </div>
+            <div>
+              {{ form.sale_price.label(class_="block text-white font-semibold
+              text-xl mb-3") }} {{ form.sale_price(class_="w-full bg-gray-800
+              border border-gray-700 text-white rounded-lg px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              transition-all", step="0.01") }}
+            </div>
+          </div>
+
+          <!-- Quantity and Stock -->
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              {{ form.quantity.label(class_="block text-white font-semibold
+              text-xl mb-3") }} {{ form.quantity(class_="w-full bg-gray-800
+              border border-gray-700 text-white rounded-lg px-4 py-2
+              focus:outline-none focus:ring-2 focus:ring-blue-600
+              transition-all") }}
+            </div>
+            <div class="flex items-center">
+              <div class="mt-8">
+                {{ form.in_stock(class_="mr-2") }} {{
+                form.in_stock.label(class_="text-white font-medium") }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div class="mb-6">
+            <label class="block text-white font-semibold text-xl mb-3"
+              >Product Images</label
+            >
+            <input
+              type="file"
+              id="image-upload"
+              accept="image/*"
+              multiple
+              class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+            />
+            <p class="text-gray-400 text-sm mt-1">
+              Select multiple images. First image will be primary.
+            </p>
+
+            <!-- Image Preview Container -->
+            <div id="image-preview-container" class="mt-4">
+              <!-- Uploaded images will appear here -->
+            </div>
+
+            <!-- Hidden input to store image URLs -->
+            <input type="hidden" id="image-urls" name="image_urls" value="" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Variants Section -->
+      <div class="mt-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Product Variants</h2>
+
+        <div id="variants-container">
+          <!-- Variants will be dynamically added here -->
+        </div>
+
+        <button
+          type="button"
+          id="add-variant-btn"
+          class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-all font-medium"
+        >
+          Add Variant
+        </button>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-right mt-8">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full transition-all font-semibold"
+        >
+          {% if edit_mode %}Update Product{% else %}Create Product{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let variantCounter = 0;
+  let uploadedImages = [];
+
+  // Handle custom animal type
+  document
+    .getElementById("animal-type-select")
+    .addEventListener("change", function () {
+      const customContainer = document.getElementById(
+        "custom-animal-container"
+      );
+      if (this.value === "other") {
+        customContainer.classList.remove("hidden");
+      } else {
+        customContainer.classList.add("hidden");
+      }
+    });
+
+  // Handle custom form type
+  document
+    .getElementById("form-type-select")
+    .addEventListener("change", function () {
+      const customContainer = document.getElementById("custom-form-container");
+      if (this.value === "other") {
+        customContainer.classList.remove("hidden");
+      } else {
+        customContainer.classList.add("hidden");
+      }
+    });
+
+  // Handle image upload
+  document
+    .getElementById("image-upload")
+    .addEventListener("change", function (e) {
+      const files = Array.from(e.target.files);
+      const previewContainer = document.getElementById(
+        "image-preview-container"
+      );
+
+      files.forEach((file, index) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const csrfToken = document
+          .querySelector('meta[name="csrf-token"]')
+          .getAttribute("content");
+
+        fetch("/upload_image", {
+          method: "POST",
+          headers: { "X-CSRFToken": csrfToken },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              const imageData = {
+                url: data.link,
+                is_primary: uploadedImages.length === 0, // First image is primary
+              };
+
+              uploadedImages.push(imageData);
+              updateImagePreview();
+              updateImageUrls();
+            } else {
+              alert("Image upload failed: " + data.error);
+            }
+          })
+          .catch((error) => {
+            alert("Upload error: " + error.message);
+          });
+      });
+    });
+
+  function updateImagePreview() {
+    const container = document.getElementById("image-preview-container");
+    container.innerHTML = "";
+
+    uploadedImages.forEach((image, index) => {
+      const imageContainer = document.createElement("div");
+      imageContainer.className = "image-container";
+
+      imageContainer.innerHTML = `
+        <img src="${image.url}" class="image-preview" alt="Product image">
+        ${image.is_primary ? '<span class="primary-badge">Primary</span>' : ""}
+        <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+      `;
+
+      container.appendChild(imageContainer);
+    });
+  }
+
+  function removeImage(index) {
+    uploadedImages.splice(index, 1);
+    // If we removed the primary image, make the first remaining image primary
+    if (uploadedImages.length > 0) {
+      uploadedImages[0].is_primary = true;
+    }
+    updateImagePreview();
+    updateImageUrls();
+  }
+
+  function updateImageUrls() {
+    document.getElementById("image-urls").value =
+      JSON.stringify(uploadedImages);
+  }
+
+  // Add variant functionality
+  document
+    .getElementById("add-variant-btn")
+    .addEventListener("click", function () {
+      const container = document.getElementById("variants-container");
+      const variantHtml = `
+      <div class="variant-item" data-variant-id="${variantCounter}">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-white">Variant ${
+            variantCounter + 1
+          }</h3>
+          <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm" onclick="removeVariant(${variantCounter})">Remove</button>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-white font-medium mb-2">Variant Name (e.g., Weight, Size, Color):</label>
+          <input type="text" name="variant_name_${variantCounter}" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all" placeholder="e.g., Weight">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-white font-medium mb-2">Variant Options:</label>
+          <div class="variant-options" id="variant-options-${variantCounter}">
+            <!-- Options will be added here -->
+          </div>
+          <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-2" onclick="addVariantOption(${variantCounter})">Add Option</button>
+        </div>
+      </div>
+    `;
+
+      container.insertAdjacentHTML("beforeend", variantHtml);
+      addVariantOption(variantCounter);
+      variantCounter++;
+    });
+
+  function addVariantOption(variantId) {
+    const optionsContainer = document.getElementById(
+      `variant-options-${variantId}`
+    );
+    const optionId = Date.now();
+
+    const optionHtml = `
+      <div class="variant-option" data-option-id="${optionId}">
+        <input type="text" name="variant_value_${variantId}[]" class="flex-1 bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="e.g., 2kg">
+        <input type="number" name="variant_price_${variantId}[]" class="w-24 bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Price" step="0.01">
+        <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm" onclick="removeVariantOption(${optionId})">Remove</button>
+      </div>
+    `;
+
+    optionsContainer.insertAdjacentHTML("beforeend", optionHtml);
+  }
+
+  function removeVariantOption(optionId) {
+    const option = document.querySelector(`[data-option-id="${optionId}"]`);
+    if (option) {
+      option.remove();
+    }
+  }
+
+  function removeVariant(variantId) {
+    const variant = document.querySelector(`[data-variant-id="${variantId}"]`);
+    if (variant) {
+      variant.remove();
+    }
+  }
+
+  // Form submission handling
+  document
+    .getElementById("add-product-form")
+    .addEventListener("submit", function (e) {
+      // Handle custom animal type
+      const animalSelect = document.getElementById("animal-type-select");
+      const customAnimalInput = document.getElementById("custom-animal-input");
+      if (animalSelect.value === "other" && customAnimalInput.value.trim()) {
+        // Create a hidden input with the custom value
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "custom_animal_type";
+        hiddenInput.value = customAnimalInput.value.trim();
+        this.appendChild(hiddenInput);
+      }
+
+      // Handle custom form type
+      const formSelect = document.getElementById("form-type-select");
+      const customFormInput = document.getElementById("custom-form-input");
+      if (formSelect.value === "other" && customFormInput.value.trim()) {
+        // Create a hidden input with the custom value
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "custom_form_type";
+        hiddenInput.value = customFormInput.value.trim();
+        this.appendChild(hiddenInput);
+      }
+    });
+
+  // Load existing data when in edit mode
+  document.addEventListener('DOMContentLoaded', function() {
+    {% if is_edit %}
+        // Load existing images
+        {% if existing_images %}
+            uploadedImages = {{ existing_images | tojson }};
+            updateImagePreview();
+            updateImageUrls();
+        {% endif %}
+
+        // Load existing variants
+        {% if existing_variants %}
+            const existingVariants = {{ existing_variants | tojson }};
+
+            Object.keys(existingVariants).forEach(function(variantName) {
+                const container = document.getElementById("variants-container");
+                const variantHtml = `
+                <div class="variant-item" data-variant-id="${variantCounter}">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">Variant ${variantCounter + 1}</h3>
+                        <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm" onclick="removeVariant(${variantCounter})">Remove</button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-white font-medium mb-2">Variant Name (e.g., Weight, Size, Color):</label>
+                        <input type="text" name="variant_name_${variantCounter}" value="${variantName}" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all" placeholder="e.g., Weight">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-white font-medium mb-2">Variant Options:</label>
+                        <div class="variant-options" id="variant-options-${variantCounter}">
+                            <!-- Options will be added here -->
+                        </div>
+                        <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-2" onclick="addVariantOption(${variantCounter})">Add Option</button>
+                    </div>
+                </div>
+                `;
+
+                container.insertAdjacentHTML("beforeend", variantHtml);
+
+                // Add existing options for this variant
+                const options = existingVariants[variantName];
+                const optionsContainer = document.getElementById(`variant-options-${variantCounter}`);
+
+                options.forEach(function(option) {
+                    const optionId = Date.now() + Math.random();
+                    const optionHtml = `
+                    <div class="variant-option" data-option-id="${optionId}">
+                        <input type="text" name="variant_value_${variantCounter}[]" value="${option.value}" class="flex-1 bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="e.g., 2kg">
+                        <input type="number" name="variant_price_${variantCounter}[]" value="${option.price}" class="w-24 bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Price" step="0.01">
+                        <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm" onclick="removeVariantOption(${optionId})">Remove</button>
+                    </div>
+                    `;
+                    optionsContainer.insertAdjacentHTML("beforeend", optionHtml);
+                });
+
+                variantCounter++;
+            });
+        {% endif %}
+
+        // Handle custom animal type in edit mode
+        {% if product.animal_type and product.animal_type not in ['dog', 'cat', 'bird', 'fish', 'reptile', 'small_pet', 'livestock'] %}
+            const animalSelect = document.getElementById("animal-type-select");
+            const customAnimalContainer = document.getElementById("custom-animal-container");
+            const customAnimalInput = document.getElementById("custom-animal-input");
+
+            animalSelect.value = "other";
+            customAnimalContainer.classList.remove("hidden");
+            customAnimalInput.value = "{{ product.animal_type }}";
+        {% endif %}
+
+        // Handle custom form type in edit mode
+        {% if product.form_type and product.form_type not in ['tablet', 'capsule', 'powder', 'liquid', 'injection', 'topical', 'spray'] %}
+            const formSelect = document.getElementById("form-type-select");
+            const customFormContainer = document.getElementById("custom-form-container");
+            const customFormInput = document.getElementById("custom-form-input");
+
+            formSelect.value = "other";
+            customFormContainer.classList.remove("hidden");
+            customFormInput.value = "{{ product.form_type }}";
+        {% endif %}
+    {% endif %}
+  });
+</script>
+{% endblock %}
