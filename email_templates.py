@@ -230,8 +230,6 @@ def create_order_confirmation_email(order, recipient_email):
         MIMEMultipart: Formatted email message ready to send
     """
 
-    formatted_date = order.created_at.strftime("%B %d, %Y at %I:%M %p")
-
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"Order Confirmation #{str(order.id)[:8]} "
     msg["From"] = "Fassih Ul Abbas <blogs.fassih@gmail.com>"
@@ -297,7 +295,6 @@ Thank you for your order! We've received your order and it's being processed.
 
 ORDER DETAILS:
 Order ID: {order.id}
-Order Date: {formatted_date}
 Status: {order.status.title()}
 
 ITEMS ORDERED:
@@ -375,7 +372,6 @@ This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
             
             <div class="order-info">
                 <div class="order-id">Order ID: {str(order.id)}</div>
-                <p style="margin: 5px 0;">Date: {formatted_date}</p>
                 <p style="margin: 5px 0;">Status: <span style="color: #28a745; font-weight: bold;">{order.status.title()}</span></p>
             </div>
             
@@ -471,8 +467,6 @@ def create_admin_order_alert_email(order, admin_email):
     msg["From"] = "Vet Insights Order System <blogs.fassih@gmail.com>"
     msg["To"] = admin_email
 
-    formatted_date = order.created_at.strftime("%B %d, %Y at %I:%M %p")
-
     items_html = ""
     for item in order.items:
         variant_info = ""
@@ -516,7 +510,6 @@ def create_admin_order_alert_email(order, admin_email):
     <body>
         <h2>🚨 New Order Received</h2>
         <p><strong>Order ID:</strong> {str(order.id)}<br>
-           <strong>Order Time:</strong> {formatted_date}<br>
            <strong>Source:</strong> {order.source.title()}<br>
            <strong>Status:</strong> {order.status.title()}</p>
 
@@ -562,7 +555,6 @@ def create_admin_order_alert_email(order, admin_email):
 New Order Received
 
 Order ID: {order.id}
-Order Time: {formatted_date}
 Source: {order.source.title()}
 Status: {order.status.title()}
 
@@ -606,15 +598,12 @@ def create_order_completion_email(order, recipient_email):
     msg["From"] = "Vet Insights <blogs.fassih@gmail.com>"
     msg["To"] = recipient_email
 
-    formatted_date = order.created_at.strftime("%B %d, %Y at %I:%M %p")
-
     text = f"""
 Hi {order.first_name},
 
 Good news! Your order #{order.id} has been successfully completed and delivered.
 
 Order Summary:
-Date: {formatted_date}
 Total Paid: PKR {order.total_amount}
 
 Thank you for shopping with Vet Insights. We hope to see you again soon!
@@ -633,10 +622,7 @@ Vet Insights
             <p>We're excited to let you know that your order <strong>#{order.id}</strong> has been successfully <strong>delivered</strong>.</p>
 
             <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
-                <tr>
-                    <td><strong>Order Date:</strong></td>
-                    <td>{formatted_date}</td>
-                </tr>
+          
                 <tr>
                     <td><strong>Total Paid:</strong></td>
                     <td>PKR {order.total_amount}</td>
