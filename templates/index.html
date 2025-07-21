@@ -98,7 +98,8 @@
   {% include 'navbar.html' %} {% include 'alert.html' %}
 
   <body>
-    <section class="relative h-[75vh] w-full overflow-hidden">
+<body>
+   <section class="relative h-[75vh] w-full overflow-hidden">
       <img
         class="absolute top-0 right-0 left-0 object-cover w-full h-full"
         src="{{ url_for('static', filename='img/hero-bg.svg') }}"
@@ -109,14 +110,14 @@
         class="relative z-10 flex flex-col lg:flex-row items-center justify-between h-full px-4 sm:px-8 md:px-16 lg:px-32 xl:px-64"
       >
         <div
-          class="max-w-xl lg:ml-10 text-center lg:text-left mt-16 md:mt-0 lg:mt-0"
+          class="max-w-xl lg:ml-10 text-center lg:text-left mt-8 md:mt-0 lg:mt-0"
         >
           <h1
-            class="text-3xl sm:text-4xl lg:text-6xl font-bold mb-8 text-white lg:text-nowrap"
+            class="text-2xl sm:text-4xl lg:text-6xl font-bold mb-6 md:mb-8 text-white lg:text-nowrap"
           >
             Dr. Fassih Ul Abbas
           </h1>
-          <p class="text-base sm:text-lg mb-8 text-gray-400">
+          <p class="text-sm sm:text-base md:text-lg mb-6 md:mb-8 text-gray-300">
             Experienced and compassionate veterinarian committed to advancing
             animal health and welfare. Proficient in clinical diagnostics,
             surgical procedures, and client communication across both small and
@@ -124,17 +125,17 @@
             evidence-based veterinary care.
           </p>
           <a
-            href="#contact"
+            href="{{ url_for('bookings.new_booking') }}"
             class="inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-full hover:bg-gray-100 transition hover:scale-105 font-primary"
           >
-            Contact Me
+            Book me
           </a>
         </div>
 
         <img
           src="{{ url_for('static', filename='img/hero-portrait.png') }}"
           alt="Dr. Fassih"
-          class="lg:h-[95%] md:h-3/4 object-cover rounded-xl mt-10 mr-12 md:mr-0 lg:mr-0"
+          class="lg:h-[95%] md:h-3/4 h-80 sm:h-96 object-cover rounded-xl mt-8 lg:mt-10 mr-0 md:mr-0 lg:mr-0"
         />
       </div>
     </section>
@@ -369,7 +370,7 @@
           <!-- LinkedIn -->
           <div class="group">
             <a
-              href="https://www.linkedin.com/in/fassih-ul-abbas-01240b247?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+              href="https://www.linkedin.com/in/dr-fassih-ul-abbas-01240b247/"
               target="_blank"
               rel="noopener noreferrer"
               class="flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100"
@@ -396,7 +397,7 @@
           <!-- Instagram -->
           <div class="group">
             <a
-              href="https://www.instagram.com/fassih_rajpoot"
+              href="https://www.instagram.com/vetinsightss?igsh=MXJ0ZzN6em5sOHNyYg=="
               target="_blank"
               rel="noopener noreferrer"
               class="flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100"
@@ -417,15 +418,15 @@
               <h3 class="text-lg font-semibold text-gray-800 mb-2">
                 Instagram
               </h3>
-              <p class="text-gray-600 text-center">@fassih_rajpoot</p>
-              <p class="text-sm text-gray-500 mt-1">Daily Vet Life & Tips</p>
+              <p class="text-gray-600 text-center">@vetinsightss</p>
+              <p class="text-sm text-gray-500 mt-1">For your pet's health</p>
             </a>
           </div>
 
           <!-- Facebook -->
           <div class="group">
             <a
-              href="https://www.facebook.com/share/1M42mRJGij/"
+              href="https://www.facebook.com/share/1GtWYWhrAT/"
               target="_blank"
               rel="noopener noreferrer"
               class="flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100"
@@ -444,7 +445,7 @@
                 </svg>
               </div>
               <h3 class="text-lg font-semibold text-gray-800 mb-2">Facebook</h3>
-              <p class="text-gray-600 text-center">Dr. Fassih Abbas</p>
+              <p class="text-gray-600 text-center">Vet Insights</p>
               <p class="text-sm text-gray-500 mt-1">Community & Updates</p>
             </a>
           </div>
@@ -452,8 +453,7 @@
 
         <div class="text-center mt-12">
           <p class="text-gray-600 mb-4">
-            For urgent veterinary emergencies, please contact me through any of
-            the above
+            For urgent veterinary emergencies, please contact me through the phone number above
           </p>
           <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
             <svg

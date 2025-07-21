@@ -12,6 +12,8 @@ from wtforms import (
     EmailField,
     TelField,
     RadioField,
+    DateField,
+    TimeField,
 )
 from wtforms.validators import (
     DataRequired,
@@ -335,20 +337,57 @@ class CartForm(FlaskForm):
     submit = SubmitField("Proceed to Checkout")
 
 
-class QuickUpdateForm(FlaskForm):
-
-    product_slug = StringField("Product Slug", validators=[DataRequired()])
-    variants = HiddenField("Variants", validators=[Optional()])
-    new_quantity = IntegerField(
-        "New Quantity", validators=[DataRequired(), NumberRange(min=0, max=999)]
-    )
-    submit = SubmitField("Update")
-
-
 class CancelOrderForm(FlaskForm):
     reason = TextAreaField("Reason (optional)", validators=[Optional()])
     submit = SubmitField("Confirm Cancel")
 
 
 class CompleteOrderForm(FlaskForm):
+    submit = SubmitField("Mark as Completed")
+
+
+class NewBookingForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired(), Length(max=50)])
+    last_name = StringField("Last Name", validators=[DataRequired(), Length(max=50)])
+    phone = StringField("Phone Number", validators=[DataRequired(), Length(max=20)])
+    email = EmailField("Email", validators=[DataRequired()])
+
+    service_type = SelectField(
+        "Service Type",
+        choices=[
+            ("consultation", "Consultation"),
+            ("vaccination", "Vaccination"),
+            ("surgery", "Surgery"),
+            ("dental", "Dental Cleaning"),
+            ("grooming", "Grooming"),
+            ("emergency", "Emergency Care"),
+            ("deworming", "Deworming"),
+            ("checkup", "Routine Check-up"),
+        ],
+        validators=[DataRequired()],
+    )
+
+    animal_type = StringField("Animal Type (optional)", validators=[Length(max=50)])
+    notes = TextAreaField("Additional Notes")
+
+    booking_date = DateField(
+        "Preferred Date", validators=[DataRequired()], format="%Y-%m-%d"
+    )
+    start_time = TimeField(
+        "Preferred Time", validators=[DataRequired()], format="%H:%M"
+    )
+
+    submit = SubmitField("Request Appointment")
+
+
+class CancelBookingForm(FlaskForm):
+    reason = TextAreaField("Reason (optional)", validators=[Optional()])
+    submit = SubmitField("Cancel Booking")
+
+
+class ConfirmBookingForm(FlaskForm):
+    submit = SubmitField("Confirm Booking")
+
+
+class CompleteBookingForm(FlaskForm):
     submit = SubmitField("Mark as Completed")

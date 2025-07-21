@@ -706,3 +706,566 @@ Vet Insights
     msg.attach(MIMEText(text, "plain", "utf-8"))
     msg.attach(MIMEText(html, "html", "utf-8"))
     return msg
+
+
+def create_booking_confirmation_email(booking, recipient_email):
+    """
+    Creates a professional booking confirmation email for customers
+
+    Args:
+        booking (Bookings): The booking object containing all booking details
+        recipient_email (str): Customer's email address
+
+    Returns:
+        MIMEMultipart: Formatted email message ready to send
+    """
+    created_at_local = booking.created_at.astimezone(ZoneInfo("Asia/Karachi"))
+    formatted_created_date = created_at_local.strftime("%B %d, %Y at %I:%M %p")
+
+    # Format the booking date and time
+    booking_datetime = datetime.combine(booking.booking_date, booking.start_time)
+    formatted_booking_date = booking_datetime.strftime("%B %d, %Y")
+    formatted_booking_time = booking_datetime.strftime("%I:%M %p")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"✅ Booking Confirmed - {booking.service_type}"
+    msg["From"] = "Vet Insights <blogs.fassih@gmail.com>"
+    msg["To"] = recipient_email
+
+    text_content = f"""
+Hello {booking.first_name} {booking.last_name},
+
+Great news! Your veterinary service booking has been confirmed.
+
+BOOKING DETAILS:
+Booking ID: {str(booking.id)}
+Service: {booking.service_type}
+{f"Animal: {booking.animal_type}" if booking.animal_type else ""}
+Date: {formatted_booking_date}
+Time: {formatted_booking_time}
+Status: Confirmed
+
+CONTACT INFORMATION:
+Name: {booking.first_name} {booking.last_name}
+Phone: {booking.phone}
+Email: {booking.email}
+
+{f"SPECIAL NOTES: {booking.notes}" if booking.notes else ""}
+
+WHAT'S NEXT:
+• Please arrive 10 minutes before your scheduled time
+• Bring any relevant medical records for your animal
+• If you need to reschedule, contact us at least 24 hours in advance
+
+If you have any questions or need to make changes to your booking, please contact us at blogs.fassih@gmail.com or call us.
+
+We look forward to seeing you soon!
+
+Best regards,
+Fassih Ul Abbas
+Vet Insights
+
+--
+This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+    """.strip()
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; color: #333; line-height: 1.6; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; margin-bottom: 30px; background-color: #e8f5e8; padding: 20px; border-radius: 8px; }}
+            .booking-info {{ 
+                background-color: #e8f5e8; 
+                border: 2px solid #28a745; 
+                border-radius: 8px; 
+                padding: 20px; 
+                margin: 20px 0; 
+            }}
+            .booking-id {{ font-size: 18px; font-weight: bold; color: #28a745; }}
+            .section {{ margin: 20px 0; }}
+            .section-title {{ font-size: 16px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }}
+            .info-box {{ 
+                background-color: #f8f9fa; 
+                border-left: 4px solid #2563eb; 
+                padding: 15px; 
+                margin: 10px 0; 
+            }}
+            .important-box {{ 
+                background-color: #fff9db; 
+                border: 1px solid #fbbf24; 
+                border-radius: 8px; 
+                padding: 15px; 
+                margin: 20px 0; 
+            }}
+            .footer {{ 
+                margin-top: 30px; 
+                padding-top: 20px; 
+                border-top: 1px solid #eee; 
+                font-size: 12px; 
+                color: #666; 
+                text-align: center; 
+            }}
+            .success-icon {{ color: #28a745; font-size: 24px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="success-icon">✅</div>
+                <h1 style="color: #28a745; margin: 10px 0;">Booking Confirmed!</h1>
+                <p>Your veterinary appointment is scheduled</p>
+            </div>
+            
+            <div class="booking-info">
+                <div class="booking-id">Booking ID: {str(booking.id)}</div>
+                <p style="margin: 5px 0;"><strong>Service:</strong> {booking.service_type}</p>
+                {f'<p style="margin: 5px 0;"><strong>Animal:</strong> {booking.animal_type}</p>' if booking.animal_type else ''}
+                <p style="margin: 5px 0;"><strong>Date:</strong> {formatted_booking_date}</p>
+                <p style="margin: 5px 0;"><strong>Time:</strong> {formatted_booking_time}</p>
+                <p style="margin: 5px 0;">Status: <span style="color: #28a745; font-weight: bold;">Confirmed</span></p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Contact Information</div>
+                <div class="info-box">
+                    <strong>{booking.first_name} {booking.last_name}</strong><br>
+                    Phone: {booking.phone}<br>
+                    Email: {booking.email}
+                </div>
+            </div>
+            
+            {f'<div class="section"><div class="section-title">Special Notes</div><p style="margin: 5px 0; font-style: italic;">{booking.notes}</p></div>' if booking.notes else ''}
+            
+            <div class="important-box">
+                <h3 style="color: #92400e; margin: 0 0 10px 0;">📋 Before Your Visit:</h3>
+                <ul style="margin: 0; color: #92400e;">
+                    <li>Please arrive 10 minutes before your scheduled time</li>
+                    <li>Bring any relevant medical records for your animal</li>
+                    <li>Contact us at least 24 hours in advance for rescheduling</li>
+                </ul>
+            </div>
+            
+            <p>If you have any questions or need to make changes to your booking, please contact us at <a href="mailto:blogs.fassih@gmail.com">blogs.fassih@gmail.com</a>.</p>
+            
+            <p>We look forward to providing excellent care for your animal!</p>
+            
+            <p>Best regards,<br>
+            <strong>Fassih Ul Abbas</strong><br>
+            Vet Insights</p>
+            
+            <div class="footer">
+                This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Attach both versions
+    part1 = MIMEText(text_content, "plain", "utf-8")
+    part2 = MIMEText(html_content, "html", "utf-8")
+
+    msg.attach(part1)
+    msg.attach(part2)
+
+    return msg
+
+
+def create_booking_completion_email(booking, recipient_email):
+
+    booking_datetime = datetime.combine(booking.booking_date, booking.start_time)
+    formatted_booking_date = booking_datetime.strftime("%B %d, %Y")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"🎉 Service Completed - {booking.service_type}"
+    msg["From"] = "Vet Insights <blogs.fassih@gmail.com>"
+    msg["To"] = recipient_email
+
+    text_content = f"""
+Hello {booking.first_name},
+
+We hope you and your animal are doing well! Your veterinary service appointment has been successfully completed.
+
+COMPLETED SERVICE:
+Booking ID: {str(booking.id)[:8]}
+Service: {booking.service_type}
+Date: {formatted_booking_date}
+Status: Completed
+
+Thank you for choosing Vet Insights for your animal's healthcare needs. We were pleased to provide our services to you and your beloved companion.
+
+FOLLOW-UP CARE:
+If you have any questions about the treatment provided or need follow-up care, please don't hesitate to contact us at blogs.fassih@gmail.com.
+
+We appreciate your trust in our services and look forward to serving you again in the future.
+
+Best regards,
+Fassih Ul Abbas
+Vet Insights
+
+--
+This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+    """.strip()
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; color: #333; line-height: 1.6; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; margin-bottom: 30px; background-color: #f0f8ff; padding: 20px; border-radius: 8px; }}
+            .service-info {{ 
+                background-color: #e8f5e8; 
+                border: 2px solid #28a745; 
+                border-radius: 8px; 
+                padding: 20px; 
+                margin: 20px 0; 
+            }}
+            .follow-up-box {{ 
+                background-color: #fff9db; 
+                border: 1px solid #fbbf24; 
+                border-radius: 8px; 
+                padding: 15px; 
+                margin: 20px 0; 
+            }}
+            .footer {{ 
+                margin-top: 30px; 
+                padding-top: 20px; 
+                border-top: 1px solid #eee; 
+                font-size: 12px; 
+                color: #666; 
+                text-align: center; 
+            }}
+            .success-icon {{ color: #28a745; font-size: 24px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="success-icon">🎉</div>
+                <h1 style="color: #28a745; margin: 10px 0;">Service Completed!</h1>
+                <p>Thank you for choosing Vet Insights</p>
+            </div>
+            
+            <p>Hello {booking.first_name},</p>
+            
+            <p>We hope you and your animal are doing well! Your veterinary service appointment has been successfully <strong>completed</strong>.</p>
+            
+            <div class="service-info">
+                <p style="margin: 5px 0;"><strong>Booking ID:</strong> {str(booking.id)[:8]}</p>
+                <p style="margin: 5px 0;"><strong>Service:</strong> {booking.service_type}</p>
+                <p style="margin: 5px 0;"><strong>Date:</strong> {formatted_booking_date}</p>
+                <p style="margin: 5px 0;">Status: <span style="color: #28a745; font-weight: bold;">Completed</span></p>
+            </div>
+            
+            <p>Thank you for choosing <strong>Vet Insights</strong> for your animal's healthcare needs. We were pleased to provide our services to you and your beloved companion.</p>
+            
+            <div class="follow-up-box">
+                <h3 style="color: #92400e; margin: 0 0 10px 0;">🩺 Follow-up Care:</h3>
+                <p style="margin: 0; color: #92400e;">
+                    If you have any questions about the treatment provided or need follow-up care, please don't hesitate to contact us at <a href="mailto:blogs.fassih@gmail.com">blogs.fassih@gmail.com</a>.
+                </p>
+            </div>
+            
+            <p>We appreciate your trust in our services and look forward to serving you again in the future.</p>
+            
+            <p>Best regards,<br>
+            <strong>Fassih Ul Abbas</strong><br>
+            Vet Insights</p>
+            
+            <div class="footer">
+                This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Attach both versions
+    part1 = MIMEText(text_content, "plain", "utf-8")
+    part2 = MIMEText(html_content, "html", "utf-8")
+
+    msg.attach(part1)
+    msg.attach(part2)
+
+    return msg
+
+
+def create_booking_cancellation_email(booking, recipient_email, reason=None):
+
+    booking_datetime = datetime.combine(booking.booking_date, booking.start_time)
+    formatted_booking_date = booking_datetime.strftime("%B %d, %Y")
+    formatted_booking_time = booking_datetime.strftime("%I:%M %p")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"❌ Booking Cancelled - {booking.service_type}"
+    msg["From"] = "Vet Insights <blogs.fassih@gmail.com>"
+    msg["To"] = recipient_email
+
+    text_content = f"""
+Hello {booking.first_name} {booking.last_name},
+
+We regret to inform you that your veterinary service booking has been cancelled.
+
+CANCELLED BOOKING DETAILS:
+Booking ID: {str(booking.id)[:8]}
+Service: {booking.service_type}
+{f"Animal: {booking.animal_type}" if booking.animal_type else ""}
+Original Date: {formatted_booking_date}
+Original Time: {formatted_booking_time}
+Status: Cancelled
+
+{f"REASON FOR CANCELLATION: {reason}" if reason else ""}
+
+We sincerely apologize for any inconvenience this may cause. If you would like to reschedule your appointment, please contact us at blogs.fassih@gmail.com or call us to book a new appointment.
+
+Our team is here to help ensure your animal receives the care they need at a time that works for you.
+
+Best regards,
+Fassih Ul Abbas
+Vet Insights
+
+--
+This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+    """.strip()
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; color: #333; line-height: 1.6; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; margin-bottom: 30px; background-color: #fee; padding: 20px; border-radius: 8px; }}
+            .booking-info {{ 
+                background-color: #fff0f0; 
+                border: 2px solid #dc2626; 
+                border-radius: 8px; 
+                padding: 20px; 
+                margin: 20px 0; 
+            }}
+            .booking-id {{ font-size: 18px; font-weight: bold; color: #dc2626; }}
+            .reason-box {{ 
+                background-color: #fef3c7; 
+                border: 1px solid #f59e0b; 
+                border-radius: 8px; 
+                padding: 15px; 
+                margin: 20px 0; 
+            }}
+            .reschedule-box {{ 
+                background-color: #dbeafe; 
+                border: 1px solid #3b82f6; 
+                border-radius: 8px; 
+                padding: 15px; 
+                margin: 20px 0; 
+            }}
+            .footer {{ 
+                margin-top: 30px; 
+                padding-top: 20px; 
+                border-top: 1px solid #eee; 
+                font-size: 12px; 
+                color: #666; 
+                text-align: center; 
+            }}
+            .cancel-icon {{ color: #dc2626; font-size: 24px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="cancel-icon">❌</div>
+                <h1 style="color: #dc2626; margin: 10px 0;">Booking Cancelled</h1>
+                <p>We apologize for any inconvenience</p>
+            </div>
+            
+            <p>Hello {booking.first_name} {booking.last_name},</p>
+            
+            <p>We regret to inform you that your veterinary service booking has been <strong>cancelled</strong>.</p>
+            
+            <div class="booking-info">
+                <div class="booking-id">Booking ID: {str(booking.id)[:8]}</div>
+                <p style="margin: 5px 0;"><strong>Service:</strong> {booking.service_type}</p>
+                {f'<p style="margin: 5px 0;"><strong>Animal:</strong> {booking.animal_type}</p>' if booking.animal_type else ''}
+                <p style="margin: 5px 0;"><strong>Original Date:</strong> {formatted_booking_date}</p>
+                <p style="margin: 5px 0;"><strong>Original Time:</strong> {formatted_booking_time}</p>
+                <p style="margin: 5px 0;">Status: <span style="color: #dc2626; font-weight: bold;">Cancelled</span></p>
+            </div>
+            
+            {f'<div class="reason-box"><h3 style="color: #92400e; margin: 0 0 10px 0;">📝 Reason for Cancellation:</h3><p style="margin: 0; color: #92400e;">{reason}</p></div>' if reason else ''}
+            
+            <p>We sincerely apologize for any inconvenience this may cause.</p>
+            
+            <div class="reschedule-box">
+                <h3 style="color: #1e40af; margin: 0 0 10px 0;">📅 Want to Reschedule?</h3>
+                <p style="margin: 0; color: #1e40af;">
+                    If you would like to book a new appointment, please contact us at <a href="mailto:blogs.fassih@gmail.com">blogs.fassih@gmail.com</a> or call us. Our team is here to help ensure your animal receives the care they need at a time that works for you.
+                </p>
+            </div>
+            
+            <p>Best regards,<br>
+            <strong>Fassih Ul Abbas</strong><br>
+            Vet Insights</p>
+            
+            <div class="footer">
+                This email was sent on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Attach both versions
+    part1 = MIMEText(text_content, "plain", "utf-8")
+    part2 = MIMEText(html_content, "html", "utf-8")
+
+    msg.attach(part1)
+    msg.attach(part2)
+
+    return msg
+
+
+def create_admin_booking_alert_email(booking, admin_email, action_type="new"):
+
+    action_icons = {
+        "new": "🆕",
+        "confirmed": "✅",
+        "cancelled": "❌",
+        "completed": "🎉",
+    }
+
+    action_colors = {
+        "new": "#3b82f6",
+        "confirmed": "#28a745",
+        "cancelled": "#dc2626",
+        "completed": "#8b5cf6",
+    }
+
+    created_at_local = booking.created_at.astimezone(ZoneInfo("Asia/Karachi"))
+    formatted_created_date = created_at_local.strftime("%B %d, %Y at %I:%M %p")
+
+    booking_datetime = datetime.combine(booking.booking_date, booking.start_time)
+    formatted_booking_date = booking_datetime.strftime("%B %d, %Y")
+    formatted_booking_time = booking_datetime.strftime("%I:%M %p")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = (
+        f"[ADMIN] {action_icons.get(action_type, '📋')} Booking {action_type.title()} - {str(booking.id)[:8]}"
+    )
+    msg["From"] = "Vet Insights Booking System <blogs.fassih@gmail.com>"
+    msg["To"] = admin_email
+
+    text_content = f"""
+BOOKING {action_type.upper()}
+
+Booking ID: {booking.id}
+Action: {action_type.title()}
+Status: {booking.status.title()}
+Created: {formatted_created_date}
+
+SERVICE DETAILS:
+Service Type: {booking.service_type}
+{f"Animal Type: {booking.animal_type}" if booking.animal_type else ""}
+Scheduled Date: {formatted_booking_date}
+Scheduled Time: {formatted_booking_time}
+
+CUSTOMER INFO:
+Name: {booking.first_name} {booking.last_name}
+Phone: {booking.phone}
+Email: {booking.email}
+
+{f"NOTES: {booking.notes}" if booking.notes else ""}
+
+--
+System generated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+    """.strip()
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; font-size: 14px; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ 
+                background-color: {action_colors.get(action_type, '#f8f9fa')}; 
+                color: white; 
+                padding: 15px; 
+                border-radius: 8px; 
+                text-align: center; 
+                margin-bottom: 20px; 
+            }}
+            .booking-info {{ 
+                background-color: #f8f9fa; 
+                border-left: 4px solid {action_colors.get(action_type, '#6c757d')}; 
+                padding: 15px; 
+                margin: 15px 0; 
+            }}
+            .section {{ margin: 20px 0; }}
+            .section-title {{ font-weight: bold; color: #2563eb; margin-bottom: 8px; }}
+            .customer-info {{ 
+                background-color: #e9ecef; 
+                padding: 15px; 
+                border-radius: 6px; 
+                margin: 15px 0; 
+            }}
+            .footer {{ 
+                margin-top: 30px; 
+                padding-top: 15px; 
+                border-top: 1px solid #dee2e6; 
+                font-size: 12px; 
+                color: #6c757d; 
+                text-align: center; 
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2 style="margin: 0;">{action_icons.get(action_type, '📋')} Booking {action_type.title()}</h2>
+            </div>
+            
+            <div class="booking-info">
+                <p style="margin: 5px 0;"><strong>Booking ID:</strong> {str(booking.id)}</p>
+                <p style="margin: 5px 0;"><strong>Status:</strong> {booking.status.title()}</p>
+                <p style="margin: 5px 0;"><strong>Created:</strong> {formatted_created_date}</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Service Details</div>
+                <p style="margin: 5px 0;"><strong>Service Type:</strong> {booking.service_type}</p>
+                {f'<p style="margin: 5px 0;"><strong>Animal Type:</strong> {booking.animal_type}</p>' if booking.animal_type else ''}
+                <p style="margin: 5px 0;"><strong>Scheduled Date:</strong> {formatted_booking_date}</p>
+                <p style="margin: 5px 0;"><strong>Scheduled Time:</strong> {formatted_booking_time}</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Customer Information</div>
+                <div class="customer-info">
+                    <strong>{booking.first_name} {booking.last_name}</strong><br>
+                    Phone: {booking.phone}<br>
+                    Email: {booking.email}
+                </div>
+            </div>
+            
+            {f'<div class="section"><div class="section-title">Additional Notes</div><p style="font-style: italic; background-color: #fff3cd; padding: 10px; border-radius: 4px;">{booking.notes}</p></div>' if booking.notes else ''}
+            
+            <div class="footer">
+                System generated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Attach both versions
+    part1 = MIMEText(text_content, "plain", "utf-8")
+    part2 = MIMEText(html_content, "html", "utf-8")
+
+    msg.attach(part1)
+    msg.attach(part2)
+
+    return msg

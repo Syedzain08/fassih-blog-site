@@ -36,6 +36,7 @@ from blueprints.admin.routes import admin_bp
 from blueprints.blog.routes import blog_bp
 from blueprints.auth.routes import auth_bp
 from blueprints.store.routes import store_bp
+from blueprints.bookings.routes import bookings_bp
 from blueprints.sitemap.sitemaps import sitemap_bp
 
 
@@ -74,6 +75,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(store_bp)
+app.register_blueprint(bookings_bp)
 app.register_blueprint(sitemap_bp)
 
 

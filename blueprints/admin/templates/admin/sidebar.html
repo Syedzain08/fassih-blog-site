@@ -50,6 +50,13 @@
             <span class="material-symbols-outlined mr-3"> orders </span>
             <span>Manage Orders</span>
           </a>
+          <a
+            href="{{ url_for('admin.manage_bookings') }}"
+            class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors duration-200"
+          >
+            <span class="material-symbols-outlined mr-3"> book </span>
+            <span>Manage Bookings</span>
+          </a>
 
           {% if current_user.is_superadmin %}
           <a
