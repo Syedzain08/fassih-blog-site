@@ -110,7 +110,11 @@ class Products(db.Model):
 class ProductImages(db.Model):
     __tablename__ = "ProductImages"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("Products.id"), nullable=False)
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("Products.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     image_url = db.Column(db.String(500), nullable=False)
     is_primary = db.Column(db.Boolean, default=False, nullable=False)
     order_index = db.Column(db.Integer, default=0, nullable=False)
@@ -122,7 +126,9 @@ class ProductImages(db.Model):
 class ProductVariants(db.Model):
     __tablename__ = "ProductVariants"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("Products.id"), nullable=False)
+    product_id = db.Column(
+        db.Integer, db.ForeignKey("Products.id", ondelete="CASCADE"), nullable=False
+    )
     variant_name = db.Column(db.String(100), nullable=False)
     variant_value = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
@@ -135,9 +141,17 @@ class OrderItems(db.Model):
     __tablename__ = "Order_items"
 
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(UUID(as_uuid=True), db.ForeignKey("Orders.id"), nullable=False)
+    order_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey("Orders.id", ondelete="CASCADE"),
+        nullable=False,
+    )
 
-    product_id = db.Column(db.Integer, db.ForeignKey("Products.id"), nullable=False)
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("Products.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     product_name = db.Column(db.String(255), nullable=False)
 
     quantity = db.Column(db.Integer, nullable=False)
@@ -171,3 +185,24 @@ class Orders(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     items = db.relationship("OrderItems", backref="order", cascade="all, delete-orphan")
+
+
+class Bookings(db.Model):
+    __tablename__ = "Bookings"
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+
+    service_type = db.Column(db.String(100), nullable=False)
+    animal_type = db.Column(db.String(50), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
+    booking_date = db.Column(db.Date, nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+
+    status = db.Column(db.String(80), nullable=False, default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

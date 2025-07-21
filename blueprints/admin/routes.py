@@ -29,6 +29,8 @@ from db_models import (
     ProductImages,
     ProductVariants,
     Orders,
+    Bookings,
+    OrderItems,
 )
 from forms import (
     AddAdminForm,
@@ -38,6 +40,9 @@ from forms import (
     AddCategoryForm,
     CancelOrderForm,
     CompleteOrderForm,
+    CancelBookingForm,
+    CompleteBookingForm,
+    ConfirmBookingForm,
 )
 from utils import (
     check_username_criteria,
@@ -50,10 +55,14 @@ from utils import (
 from email_templates import (
     create_order_cancellation_email,
     create_order_completion_email,
+    create_booking_cancellation_email,
+    create_booking_confirmation_email,
+    create_booking_completion_email,
 )
 
 
 from os import getenv
+from uuid import UUID
 
 
 # --- Admin Blueprint --- #
@@ -693,7 +702,6 @@ def edit_product(product_id):
 @admin_bp.route("/products/<int:product_id>/delete", methods=["POST"])
 @login_required
 def delete_product(product_id):
-
     product_to_delete = Products.query.filter_by(id=product_id).first()
 
     if not product_to_delete:
@@ -701,13 +709,62 @@ def delete_product(product_id):
         return redirect(url_for("admin.manage_products"))
 
     try:
+
+        orders_to_cancel = (
+            db.session.query(Orders)
+            .join(OrderItems)
+            .filter(
+                OrderItems.product_id == product_id,
+                Orders.status.in_(["pending"]),
+            )
+            .all()
+        )
+
+        for order in orders_to_cancel:
+
+            for item in order.items:
+                if item.product_id != product_id:
+                    product = Products.query.get(item.product_id)
+                    if product:
+                        product.quantity += item.quantity
+
+            order.status = "cancelled"
+
+            try:
+                server = SMTP("smtp.gmail.com", 587)
+                server.starttls()
+                password = getenv("GMAIL_APP_PASSWORD")
+                user_address = getenv("GMAIL_ADDRESS")
+                server.login(user_address, password)
+
+                reason = f"Product '{product_to_delete.name}' has been discontinued and is no longer available."
+                msg = create_order_cancellation_email(
+                    order, recipient_email=order.email, reason=reason
+                )
+
+                server.sendmail(
+                    from_addr=user_address, to_addrs=order.email, msg=msg.as_bytes()
+                )
+                server.quit()
+
+            except Exception as email_error:
+                print(
+                    f"Failed to send cancellation email for order {order.id}: {email_error}"
+                )
+
         db.session.delete(product_to_delete)
         db.session.commit()
-        flash("Product deleted successfully", "success")
+
+        success_msg = "Product deleted successfully"
+        if orders_to_cancel:
+            success_msg += f" and {len(orders_to_cancel)} orders were cancelled"
+
+        flash(success_msg, "success")
         return redirect(url_for("admin.manage_products"))
-    except Exception:
+
+    except Exception as e:
         db.session.rollback()
-        flash("Error deleting product", "error")
+        flash(f"Error deleting product: {e}", "error")
         return redirect(url_for("admin.manage_products"))
 
 
@@ -837,3 +894,137 @@ def cancel_order(order_id):
             flash(f"An error occurred while cancelling the order. {e}", "danger")
 
     return redirect(url_for("admin.manage_orders", status="pending"))
+
+
+@admin_bp.route("/manage/bookings")
+def manage_bookings():
+    status = request.args.get("status", "pending")
+    page = request.args.get("page", 1, type=int)
+    per_page = 12
+
+    pagination = (
+        Bookings.query.filter_by(status=status)
+        .order_by(Bookings.created_at.desc())
+        .paginate(page=page, per_page=per_page)
+    )
+
+    return render_template(
+        "admin/manage_bookings.html",
+        bookings=pagination.items,
+        pagination=pagination,
+        current_status=status,
+        cancel_form=CancelBookingForm(),
+        confirm_form=ConfirmBookingForm(),
+        complete_form=CompleteBookingForm(),
+    )
+
+
+@admin_bp.route("/bookings/<booking_id>/confirm", methods=["POST"])
+def confirm_booking(booking_id):
+    form = ConfirmBookingForm()
+    valid_booking_id = UUID(booking_id)
+
+    if form.validate_on_submit():
+        try:
+            booking = Bookings.query.get_or_404(valid_booking_id)
+            booking.status = "confirmed"
+            db.session.commit()
+
+            server = SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            password = getenv("GMAIL_APP_PASSWORD")
+            user_address = getenv("GMAIL_ADDRESS")
+
+            server.login(user_address, password)
+
+            msg = create_booking_confirmation_email(
+                booking=booking, recipient_email=booking.email
+            )
+
+            server.sendmail(
+                from_addr=user_address, to_addrs=booking.email, msg=msg.as_bytes()
+            )
+
+            server.quit()
+
+            flash(f"Booking #{booking.id} has been confirmed successfully.", "success")
+        except Exception:
+            db.session.rollback()
+            flash("An error occurred while confirming the booking.", "danger")
+
+    return redirect(url_for("admin.manage_bookings"))
+
+
+@admin_bp.route("/bookings/<booking_id>/complete", methods=["POST"])
+def complete_booking(booking_id):
+    form = CompleteBookingForm()
+    valid_booking_id = UUID(booking_id)
+
+    if form.validate_on_submit():
+        try:
+            booking = Bookings.query.get_or_404(valid_booking_id)
+            booking.status = "completed"
+            db.session.commit()
+
+            server = SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            password = getenv("GMAIL_APP_PASSWORD")
+            user_address = getenv("GMAIL_ADDRESS")
+
+            server.login(user_address, password)
+
+            msg = create_booking_completion_email(
+                booking=booking, recipient_email=booking.email
+            )
+
+            server.sendmail(
+                from_addr=user_address, to_addrs=booking.email, msg=msg.as_bytes()
+            )
+
+            server.quit()
+
+            flash(f"Booking #{booking.id} has been marked as completed.", "success")
+
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while completing the booking.", "danger")
+
+    return redirect(url_for("admin.manage_bookings"))
+
+
+@admin_bp.route("/bookings/<booking_id>/cancel", methods=["POST"])
+def cancel_booking(booking_id):
+    form = CancelBookingForm()
+    valid_booking_id = UUID(booking_id)
+
+    if form.validate_on_submit():
+        try:
+            booking = Bookings.query.get_or_404(valid_booking_id)
+            booking.status = "cancelled"
+            db.session.commit()
+
+            server = SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            password = getenv("GMAIL_APP_PASSWORD")
+            user_address = getenv("GMAIL_ADDRESS")
+
+            server.login(user_address, password)
+
+            msg = create_booking_cancellation_email(
+                booking=booking,
+                recipient_email=booking.email,
+                reason=form.reason.data.strip(),
+            )
+
+            server.sendmail(
+                from_addr=user_address, to_addrs=booking.email, msg=msg.as_bytes()
+            )
+
+            server.quit()
+
+            flash(f"Booking #{booking.id} has been cancelled.", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while cancelling the booking.", "danger")
+
+    return redirect(url_for("admin.manage_bookings"))

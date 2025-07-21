@@ -121,6 +121,18 @@
           </li>
           <li>
             <a
+              href="{{ url_for('bookings.new_booking') }}"
+              class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200 group"
+            >
+              <span
+                class="material-symbols-outlined mr-3 text-xl group-hover:text-blue-600"
+                >book</span
+              >
+              <span class="font-medium">Book Me</span>
+            </a>
+          </li>
+          <li>
+            <a
               href="{{ url_for('store.cart') }}"
               class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200 group"
             >

@@ -1,0 +1,198 @@
+{% extends "admin/base.html" %}
+{% block title %}Manage Bookings{% endblock %}
+{% block body %}
+
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4 w-full">
+  <div>
+    <h2 class="text-xl sm:text-2xl font-bold text-white">Manage Bookings</h2>
+    <p class="text-gray-400 text-sm sm:text-base mt-1">Manage all customer bookings</p>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6 w-full">
+  <div class="flex flex-col sm:flex-row gap-4 items-center w-full flex-wrap">
+    <label class="text-sm font-medium text-gray-300">Filter Bookings</label>
+    <select id="booking-status-filter" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+      <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="confirmed" {% if current_status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+      <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+    </select>
+  </div>
+</div>
+
+<!-- Bookings -->
+<div class="space-y-6 w-full">
+  {% for booking in bookings %}
+  <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full">
+    <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start flex-wrap">
+      <div class="min-w-0 flex-1">
+        <h3 class="text-white text-lg font-semibold">Booking #{{ booking.id }}</h3>
+        <p class="text-gray-400 text-sm">Created on {{ booking.created_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+        <p class="text-gray-300 text-sm mt-1">
+          <strong>Customer:</strong> {{ booking.first_name }} {{ booking.last_name }} |
+          <strong>Phone:</strong> {{ booking.phone }} |
+          <strong>Email:</strong> {{ booking.email }}
+        </p>
+        <p class="text-gray-300 text-sm">
+          <strong>Service:</strong> {{ booking.service_type }}{% if booking.animal_type %} | <strong>Animal:</strong> {{ booking.animal_type }}{% endif %}
+        </p>
+        <p class="text-gray-300 text-sm">
+          <strong>Scheduled:</strong> {{ booking.booking_date.strftime('%b %d, %Y') }} at {{ booking.start_time.strftime('%I:%M %p') }}
+        </p>
+        {% if booking.notes %}
+        <p class="text-gray-400 text-sm mt-2"><strong>Notes:</strong> {{ booking.notes }}</p>
+        {% endif %}
+      </div>
+      
+      <div class="flex flex-wrap gap-2 sm:items-center w-full sm:w-auto">
+        {% if booking.status == 'pending' %}
+        <form method="POST" action="{{ url_for('admin.confirm_booking', booking_id=booking.id) }}" class="w-full sm:w-auto">
+            {{ confirm_form.hidden_tag() }}
+            <input type="submit" value="Confirm Booking"
+                class="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">
+        </form>
+
+        <button
+            data-booking-id="{{ booking.id }}"
+            data-booking-name="{{ booking.first_name }} {{ booking.last_name }}"
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm cancel-booking-btn">
+            Cancel Booking
+        </button>
+        {% elif booking.status == 'confirmed' %}
+        <form method="POST" action="{{ url_for('admin.complete_booking', booking_id=booking.id) }}" class="w-full sm:w-auto">
+            {{ complete_form.hidden_tag() }}
+            <input type="submit" value="Mark as Completed"
+                class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+        </form>
+
+        <button
+            data-booking-id="{{ booking.id }}"
+            data-booking-name="{{ booking.first_name }} {{ booking.last_name }}"
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm cancel-booking-btn">
+            Cancel Booking
+        </button>
+        {% else %}
+        <span class="px-4 py-2 rounded-lg text-sm {% if booking.status == 'completed' %}text-green-400{% elif booking.status == 'confirmed' %}text-blue-400{% else %}text-red-400{% endif %}">
+            {{ booking.status | capitalize }}
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center text-gray-400 mt-10">
+    <p>No {{ current_status }} bookings found.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<div class="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <div class="text-sm text-gray-400">
+    Showing {{ pagination.per_page * (pagination.page - 1) + 1 }} to 
+    {{ pagination.per_page * pagination.page if pagination.page < pagination.pages else pagination.total }} 
+    of {{ pagination.total }} bookings
+  </div>
+
+  <div class="flex items-center flex-wrap gap-2">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.manage_bookings', page=pagination.prev_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 flex items-center">
+      <i class="fas fa-chevron-left mr-1"></i> Prev
+    </a>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if page_num %}
+        {% if page_num == pagination.page %}
+        <span class="px-3 py-2 bg-blue-600 text-white rounded-lg">{{ page_num }}</span>
+        {% else %}
+        <a href="{{ url_for('admin.manage_bookings', page=page_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+      <span class="px-3 py-2 text-gray-500">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.manage_bookings', page=pagination.next_num, status=current_status) }}" class="px-3 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 flex items-center">
+      Next <i class="fas fa-chevron-right ml-1"></i>
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Cancel Modal -->
+<div id="cancel-booking-modal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
+  <form method="POST" action="" id="cancel-booking-form" class="bg-gray-900 rounded-lg border border-gray-800 w-full max-w-md mx-4">
+    {{ cancel_form.hidden_tag() }}
+    <div class="p-4 sm:p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg text-white font-semibold">Cancel Booking</h3>
+        <button id="close-cancel-modal" type="button" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <p class="text-gray-300 text-sm mb-3">
+        Are you sure you want to cancel booking <strong id="cancel-booking-id-label"></strong>?
+      </p>
+      <div class="mb-4">
+        {{ cancel_form.reason.label(class_="text-sm text-gray-300 block mb-1") }}
+        {{ cancel_form.reason(class_="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2") }}
+        {% for error in cancel_form.reason.errors %}
+        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button type="button" id="cancel-cancel-btn" class="text-gray-400 hover:text-white">Back</button>
+        {{ cancel_form.submit(class_="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg") }}
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const filterSelect = document.getElementById("booking-status-filter");
+    filterSelect.addEventListener("change", () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("status", filterSelect.value);
+      url.searchParams.set("page", "1");
+      window.location.href = url.toString();
+    });
+
+    const cancelButtons = document.querySelectorAll(".cancel-booking-btn");
+    const cancelModal = document.getElementById("cancel-booking-modal");
+    const cancelForm = document.getElementById("cancel-booking-form");
+    const cancelLabel = document.getElementById("cancel-booking-id-label");
+    const closeBtn = document.getElementById("close-cancel-modal");
+    const backBtn = document.getElementById("cancel-cancel-btn");
+
+    cancelButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const bookingId = btn.dataset.bookingId;
+        const bookingName = btn.dataset.bookingName;
+        cancelLabel.textContent = `#${bookingId} (${bookingName})`;
+        cancelForm.action = `/admin/bookings/${bookingId}/cancel`;
+        cancelModal.classList.replace("hidden", "flex");
+      });
+    });
+
+    [closeBtn, backBtn].forEach(btn => {
+      btn.addEventListener("click", () => {
+        cancelModal.classList.replace("flex", "hidden");
+      });
+    });
+
+    cancelModal.addEventListener("click", (e) => {
+      if (e.target === cancelModal) {
+        cancelModal.classList.replace("flex", "hidden");
+      }
+    });
+  });
+</script>
+
+{% endblock %}
