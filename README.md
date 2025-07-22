@@ -66,7 +66,7 @@ Vet Insight combines a veterinary blog with an e-commerce platform for vet produ
 
 The application is deployed on Render with the following setup:
 
-- **Tier**:  Render.com (Starter Web Service Package)
+- **Tier**: Render.com (Starter Web Service Package)
 - **Repository**: Public GitHub repo monitoring
 - **Domain**: vet-insight.com (registered through Spaceship)
 - **SEO**: Google Search Console, sitemaps, robots.txt configured
@@ -96,55 +96,55 @@ SUPERADMIN_EMAIL=superadmin_email
 ### Setup Steps
 
 1. **Clone the repository**
-    
-    ```bash
-    git clone [repository-url]
-    cd vet-insight
-    ```
-    
+
+   ```bash
+   git clone [repository-url]
+   cd vet-insight
+   ```
+
 2. **Set up Python environment**
-    
-    ```bash
-    pip install -r requirements.txt
-    ```
-    
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
 3. **Configure for local development**
-    
-    ```bash
-    export FLASK_ENV=development
-    export FLASK_APP=server.py
-    ```
-    
+
+   ```bash
+   export FLASK_ENV=development
+   export FLASK_APP=server.py
+   ```
+
 4. **Database Setup (Local)**
-    
-    - Remove the `getenv` call for database URI
-    - Replace with SQLite: `sqlite:///example.db`
-    - Comment out error handlers
-    - Comment out `zoneinfo` calls in `email_templates.py` (Windows compatibility)
-    - Comment out sitemap blueprint (hardcoded domain)
+
+   - Remove the `getenv` call for database URI
+   - Replace with SQLite: `sqlite:///example.db`
+   - Comment out error handlers
+   - Comment out `zoneinfo` calls in `email_templates.py` (Windows compatibility)
+   - Comment out sitemap blueprint (hardcoded domain)
+
 5. **Create initial admin user**
-    
-    ```bash
-    python db_init.py  # Creates hashed superadmin user
-    ```
-    
+
+   ```bash
+   python db_init.py  # Creates hashed superadmin user
+   ```
+
 6. **Start development servers**
-    
-    ```bash
-    # Terminal 1: Flask app
-    flask run --debug
-    
-    # Terminal 2: Tailwind CSS
-    npm run dev
-    ```
-    
+
+   ```bash
+   # Terminal 1: Flask app
+   flask run --debug
+
+   # Terminal 2: Tailwind CSS
+   npm run dev
+   ```
 
 ## 🔐 Authentication & Authorization
 
 - **Authentication**: Flask-Login with Flask-WTF CSRF protection
 - **User Roles**:
-    - **Superadmins**: Cannot be deleted, can manage all aspects
-    - **Admins**: Can manage site content and orders
+  - **Superadmins**: Cannot be deleted, can manage all aspects
+  - **Admins**: Can manage site content and orders
 - **Admin Access**: `/admin` route
 - **Guest Shopping**: Cart functionality without login required
 
@@ -226,14 +226,13 @@ All data stored in Supabase (PostgreSQL):
 
 ## 🚨 Production Notes
 
-- **Cost**: Built as a $100 budget project
 - **Maintenance**: Admin responsible for ongoing management
 - **Testing**: All functionality hand-tested during development
 - **Environment**: Production-only database migrations
 
 ## 📞 Support
 
-For technical questions or issues, contact the original developer: **Syed Zain Ul Abideen** 
+For technical questions or issues, contact the original developer: **Syed Zain Ul Abideen**
 **Email:** goodtingbye2@gmail.com
 
 ## 📄 License
