@@ -6,7 +6,7 @@ A full-stack veterinary blog and e-commerce platform built with Flask, featuring
 
 Vet Insight combines a veterinary blog with an e-commerce platform for vet products. It includes a complete content management system, shopping cart functionality, order management, and a comprehensive admin dashboard with analytics.
 
-**Live Site:** [vet-insight.com](https://vet-insights.com/)  
+**Live Site:** [vet-insights.com](https://vet-insights.com/)  
 **Deployment:** [fassihulabbas.onrender.com](https://fassihulabbas.onrender.com/)
 
 ## ✨ Features
